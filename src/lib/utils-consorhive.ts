@@ -1,0 +1,1 @@
+export { normalizarTelefone, extrairDDD, formatarData } from './utils';
