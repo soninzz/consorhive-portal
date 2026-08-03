@@ -14,7 +14,13 @@ type Lead = {
   historico_conversa: Array<{ role: string; content: string }>;
   updated_at: string;
   dor_principal: string | null;
+  follow_up_em: string | null;
+  follow_up_nota: string | null;
 };
+
+function formatarDataCurta(iso: string) {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
 
 function tempoRelativo(iso: string) {
   if (!iso) return '';
@@ -27,9 +33,9 @@ function tempoRelativo(iso: string) {
 
 function corTemperatura(t: string) {
   switch (t) {
-    case 'quente': return 'text-red-400 bg-red-500/10 border-red-500/20';
-    case 'morno': return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20';
-    default: return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+    case 'quente': return 'text-red-600 bg-red-500/10 border-red-500/20';
+    case 'morno': return 'text-yellow-700 bg-yellow-500/10 border-yellow-500/20';
+    default: return 'text-blue-600 bg-blue-500/10 border-blue-500/20';
   }
 }
 
@@ -94,25 +100,25 @@ export default function ConversasPage() {
   return (
     <div className="flex h-full overflow-hidden" style={{ height: 'calc(100vh)' }}>
       {/* Sidebar lista */}
-      <div className="w-80 border-r border-slate-800 flex flex-col flex-shrink-0">
-        <div className="p-4 border-b border-slate-800 space-y-3">
+      <div className="w-80 border-r border-border flex flex-col flex-shrink-0">
+        <div className="p-4 border-b border-border space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-slate-50 font-semibold flex items-center gap-2">
-              <MessageSquare size={16} className="text-emerald-500" />
+            <h2 className="text-foreground font-semibold flex items-center gap-2">
+              <MessageSquare size={16} className="text-emerald-600" />
               Conversas
             </h2>
-            <button onClick={carregar} className="text-slate-500 hover:text-slate-300 transition-colors">
+            <button onClick={carregar} className="text-muted-foreground hover:text-foreground transition-colors">
               <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             </button>
           </div>
           <div className="relative">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               value={busca}
               onChange={e => setBusca(e.target.value)}
               placeholder="Buscar por nome ou telefone..."
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-slate-200 text-xs placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
+              className="w-full bg-muted border border-border rounded-lg pl-8 pr-3 py-2 text-foreground text-xs placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary"
             />
           </div>
           <div className="flex gap-1">
@@ -121,10 +127,10 @@ export default function ConversasPage() {
                 key={f}
                 onClick={() => setFiltroBot(f)}
                 className={`flex-1 py-1.5 text-xs rounded-lg transition-colors ${
-                  filtroBot === f ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                  filtroBot === f ? 'bg-emerald-600 text-white' : 'bg-muted text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {f === 'todos' ? 'Todos' : f === 'ativo' ? '🤖 Bianca' : '👤 Humano'}
+                {f === 'todos' ? 'Todos' : f === 'ativo' ? '🤖 Automático' : '👤 Humano'}
               </button>
             ))}
           </div>
@@ -132,21 +138,21 @@ export default function ConversasPage() {
 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <p className="text-slate-500 text-xs p-4">Carregando...</p>
+            <p className="text-muted-foreground text-xs p-4">Carregando...</p>
           ) : filtrados.length === 0 ? (
-            <p className="text-slate-500 text-xs p-4">Nenhuma conversa encontrada.</p>
+            <p className="text-muted-foreground text-xs p-4">Nenhuma conversa encontrada.</p>
           ) : (
             filtrados.map(lead => (
               <button
                 key={lead.lead_id}
                 onClick={() => setLeadSelecionado(lead)}
-                className={`w-full text-left p-4 border-b border-slate-800/50 hover:bg-slate-800/40 transition-colors ${
-                  leadSelecionado?.lead_id === lead.lead_id ? 'bg-slate-800' : ''
+                className={`w-full text-left p-4 border-b border-border/60 hover:bg-muted/50 transition-colors ${
+                  leadSelecionado?.lead_id === lead.lead_id ? 'bg-muted' : ''
                 }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-1.5">
-                  <p className="text-slate-200 text-sm font-medium truncate">{lead.nome || lead.lead_id}</p>
-                  <span className="text-slate-600 text-xs shrink-0">{tempoRelativo(lead.updated_at)}</span>
+                  <p className="text-foreground text-sm font-medium truncate">{lead.nome || lead.lead_id}</p>
+                  <span className="text-muted-foreground text-xs shrink-0">{tempoRelativo(lead.updated_at)}</span>
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className={`text-xs px-1.5 py-0.5 rounded border capitalize ${corTemperatura(lead.temperatura)}`}>
@@ -154,15 +160,20 @@ export default function ConversasPage() {
                   </span>
                   <span className={`text-xs px-1.5 py-0.5 rounded ${
                     lead.status_bot === 'ativo'
-                      ? 'bg-emerald-900/30 text-emerald-400'
-                      : 'bg-orange-900/30 text-orange-400'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-orange-100 text-orange-700'
                   }`}>
-                    {lead.status_bot === 'ativo' ? 'Bianca' : 'Humano'}
+                    {lead.status_bot === 'ativo' ? 'Automático' : 'Humano'}
                   </span>
-                  <span className="text-slate-600 text-xs">score {lead.score ?? 0}</span>
+                  <span className="text-muted-foreground text-xs">score {lead.score ?? 0}</span>
+                  {lead.follow_up_em && (
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                      📅 {formatarDataCurta(lead.follow_up_em)}
+                    </span>
+                  )}
                 </div>
                 {lead.historico_conversa?.length > 0 && (
-                  <p className="text-slate-600 text-xs mt-1.5 truncate">
+                  <p className="text-muted-foreground text-xs mt-1.5 truncate">
                     {lead.historico_conversa[lead.historico_conversa.length - 1]?.content?.slice(0, 55)}...
                   </p>
                 )}
@@ -176,13 +187,13 @@ export default function ConversasPage() {
       {leadSelecionado ? (
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between flex-shrink-0">
+          <div className="px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
             <div>
-              <h3 className="text-slate-50 font-semibold">{leadSelecionado.nome || leadSelecionado.lead_id}</h3>
-              <p className="text-slate-500 text-xs mt-0.5">
+              <h3 className="text-foreground font-semibold">{leadSelecionado.nome || leadSelecionado.lead_id}</h3>
+              <p className="text-muted-foreground text-xs mt-0.5">
                 {leadSelecionado.lead_id} · Score {leadSelecionado.score ?? 0} ·{' '}
-                <span className={leadSelecionado.status_bot === 'ativo' ? 'text-emerald-400' : 'text-orange-400'}>
-                  {leadSelecionado.status_bot === 'ativo' ? 'Bianca respondendo' : 'Consultor responsável'}
+                <span className={leadSelecionado.status_bot === 'ativo' ? 'text-emerald-600' : 'text-orange-600'}>
+                  {leadSelecionado.status_bot === 'ativo' ? 'Automático respondendo' : 'Consultor responsável'}
                 </span>
               </p>
             </div>
@@ -203,7 +214,7 @@ export default function ConversasPage() {
                   className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                 >
                   <Bot size={13} />
-                  Devolver para Bianca
+                  Devolver para o Maikon
                 </button>
               )}
             </div>
@@ -213,23 +224,23 @@ export default function ConversasPage() {
           <div ref={chatRef} className="flex-1 overflow-y-auto p-6 space-y-3">
             {(!leadSelecionado.historico_conversa || leadSelecionado.historico_conversa.length === 0) ? (
               <div className="flex items-center justify-center h-full">
-                <p className="text-slate-600 text-sm">Nenhuma mensagem ainda.</p>
+                <p className="text-muted-foreground text-sm">Nenhuma mensagem ainda.</p>
               </div>
             ) : (
               leadSelecionado.historico_conversa.map((msg, i) => (
                 <div key={i} className={`flex gap-3 ${msg.role === 'assistant' ? '' : 'flex-row-reverse'}`}>
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-                    msg.role === 'assistant' ? 'bg-emerald-900' : 'bg-slate-700'
+                    msg.role === 'assistant' ? 'bg-emerald-100' : 'bg-muted'
                   }`}>
                     {msg.role === 'assistant'
-                      ? <Bot size={14} className="text-emerald-400" />
-                      : <User size={14} className="text-slate-400" />
+                      ? <Bot size={14} className="text-emerald-600" />
+                      : <User size={14} className="text-muted-foreground" />
                     }
                   </div>
                   <div className={`max-w-[70%] rounded-xl px-4 py-2.5 text-sm ${
                     msg.role === 'assistant'
-                      ? 'bg-slate-800 text-slate-200'
-                      : 'bg-emerald-900/20 border border-emerald-800/30 text-slate-200'
+                      ? 'bg-muted text-foreground'
+                      : 'bg-emerald-50 border border-emerald-200 text-foreground'
                   }`}>
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                   </div>
@@ -239,20 +250,26 @@ export default function ConversasPage() {
           </div>
 
           {/* Rodapé info */}
-          <div className="px-6 py-2.5 border-t border-slate-800 bg-slate-900/50 flex items-center gap-6 text-xs text-slate-500 flex-shrink-0">
-            <span>Temperatura: <strong className="text-slate-300 capitalize">{leadSelecionado.temperatura || '—'}</strong></span>
-            <span>Status: <strong className="text-slate-300">{leadSelecionado.status || '—'}</strong></span>
+          <div className="px-6 py-2.5 border-t border-border bg-muted/60 flex items-center gap-6 text-xs text-muted-foreground flex-shrink-0">
+            <span>Temperatura: <strong className="text-foreground capitalize">{leadSelecionado.temperatura || '—'}</strong></span>
+            <span>Status: <strong className="text-foreground">{leadSelecionado.status || '—'}</strong></span>
             {leadSelecionado.dor_principal && (
-              <span>Dor: <strong className="text-slate-300">{leadSelecionado.dor_principal}</strong></span>
+              <span>Dor: <strong className="text-foreground">{leadSelecionado.dor_principal}</strong></span>
             )}
-            <span>Mensagens: <strong className="text-slate-300">{leadSelecionado.historico_conversa?.length ?? 0}</strong></span>
+            <span>Mensagens: <strong className="text-foreground">{leadSelecionado.historico_conversa?.length ?? 0}</strong></span>
+            {leadSelecionado.follow_up_em && (
+              <span className="flex items-center gap-1 text-primary">
+                📅 Follow-up: <strong>{formatarDataCurta(leadSelecionado.follow_up_em)}</strong>
+                {leadSelecionado.follow_up_nota && <span className="text-muted-foreground">({leadSelecionado.follow_up_nota})</span>}
+              </span>
+            )}
           </div>
         </div>
       ) : (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <MessageSquare size={40} className="text-slate-700 mx-auto mb-3" />
-            <p className="text-slate-500 text-sm">Selecione uma conversa para visualizar</p>
+            <MessageSquare size={40} className="text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground text-sm">Selecione uma conversa para visualizar</p>
           </div>
         </div>
       )}

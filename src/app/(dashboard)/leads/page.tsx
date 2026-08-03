@@ -61,10 +61,10 @@ export default function LeadsPage() {
     <div className="flex-1 p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-50">Leads</h2>
-          <p className="text-slate-400 text-sm mt-1">Todos os contatos que interagiram com a Bianca.</p>
+          <h2 className="text-2xl font-bold text-foreground">Leads</h2>
+          <p className="text-muted-foreground text-sm mt-1">Todos os contatos que interagiram com o número.</p>
         </div>
-        <button onClick={carregar} className="text-sm text-slate-400 hover:text-slate-200 transition-colors">
+        <button onClick={carregar} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           Atualizar
         </button>
       </div>
@@ -72,19 +72,19 @@ export default function LeadsPage() {
       {/* Filtros */}
       <div className="flex gap-3 flex-wrap">
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={busca}
             onChange={e => setBusca(e.target.value)}
             placeholder="Buscar por nome ou telefone..."
-            className="bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-4 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 w-64"
+            className="bg-card border border-border rounded-lg pl-8 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary w-64"
           />
         </div>
         <select
           value={filtroTemperatura}
           onChange={e => setFiltroTemperatura(e.target.value)}
-          className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500"
+          className="bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
         >
           <option value="">Todas temperaturas</option>
           <option value="quente">🔥 Quente</option>
@@ -94,7 +94,7 @@ export default function LeadsPage() {
         <select
           value={filtroStatus}
           onChange={e => setFiltroStatus(e.target.value)}
-          className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500"
+          className="bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
         >
           <option value="">Todos os status</option>
           <option value="qualificando">Qualificando</option>
@@ -104,56 +104,56 @@ export default function LeadsPage() {
       </div>
 
       {loading ? (
-        <div className="text-slate-500 text-sm">Carregando leads...</div>
+        <div className="text-muted-foreground text-sm">Carregando leads...</div>
       ) : filtrados.length === 0 ? (
-        <div className="border border-dashed border-slate-700 rounded-xl p-16 text-center">
-          <Users size={40} className="mx-auto text-slate-600 mb-4" />
-          <p className="text-slate-400 font-medium">Nenhum lead ainda</p>
-          <p className="text-slate-600 text-sm mt-1">Quando a Bianca iniciar uma campanha, os leads aparecerão aqui.</p>
+        <div className="border border-dashed border-border rounded-xl p-16 text-center">
+          <Users size={40} className="mx-auto text-muted-foreground mb-4" />
+          <p className="text-muted-foreground font-medium">Nenhum lead ainda</p>
+          <p className="text-muted-foreground text-sm mt-1">Quando uma campanha iniciar uma campanha, os leads aparecerão aqui.</p>
         </div>
       ) : (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-          <div className="px-6 py-3 border-b border-slate-800 text-xs text-slate-500">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <div className="px-6 py-3 border-b border-border text-xs text-muted-foreground">
             {filtrados.length} lead{filtrados.length !== 1 ? 's' : ''} encontrado{filtrados.length !== 1 ? 's' : ''}
           </div>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-800">
-                <th className="text-left px-6 py-3 text-slate-400 font-medium">Nome / Telefone</th>
-                <th className="text-left px-6 py-3 text-slate-400 font-medium">Temperatura</th>
-                <th className="text-left px-6 py-3 text-slate-400 font-medium">Etapa</th>
-                <th className="text-left px-6 py-3 text-slate-400 font-medium">Dor principal</th>
-                <th className="text-left px-6 py-3 text-slate-400 font-medium">Última interação</th>
-                <th className="text-left px-6 py-3 text-slate-400 font-medium">Bot</th>
+              <tr className="border-b border-border">
+                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Nome / Telefone</th>
+                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Temperatura</th>
+                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Etapa</th>
+                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Dor principal</th>
+                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Última interação</th>
+                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Bot</th>
                 <th className="px-6 py-3" />
               </tr>
             </thead>
             <tbody>
               {filtrados.map((lead) => (
-                <tr key={lead.lead_id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+                <tr key={lead.lead_id} className="border-b border-border/60 hover:bg-muted/50 transition-colors">
                   <td className="px-6 py-4">
-                    <p className="text-slate-200 font-medium">{lead.nome || '—'}</p>
-                    <p className="text-slate-500 text-xs mt-0.5">{lead.lead_id}</p>
+                    <p className="text-foreground font-medium">{lead.nome || '—'}</p>
+                    <p className="text-muted-foreground text-xs mt-0.5">{lead.lead_id}</p>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`text-xs px-2 py-1 rounded-full border capitalize ${bgTemperatura(lead.temperatura)}`}>
                       {lead.temperatura}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-slate-400 text-xs">
+                  <td className="px-6 py-4 text-muted-foreground text-xs">
                     {labelEtapa[lead.etapa_funil] ?? lead.etapa_funil}
                   </td>
-                  <td className="px-6 py-4 text-slate-400 text-xs max-w-[200px] truncate">
+                  <td className="px-6 py-4 text-muted-foreground text-xs max-w-[200px] truncate">
                     {lead.dor_principal ?? '—'}
                   </td>
-                  <td className="px-6 py-4 text-slate-500 text-xs">
+                  <td className="px-6 py-4 text-muted-foreground text-xs">
                     {lead.ultima_interacao ? formatarData(lead.ultima_interacao) : '—'}
                   </td>
                   <td className="px-6 py-4">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       lead.status_bot === 'ativo'
-                        ? 'bg-emerald-500/10 text-emerald-400'
-                        : 'bg-slate-700 text-slate-400'
+                        ? 'bg-emerald-500/10 text-emerald-600'
+                        : 'bg-muted text-muted-foreground'
                     }`}>
                       {lead.status_bot === 'ativo' ? 'Ativa' : 'Pausada'}
                     </span>
@@ -163,16 +163,16 @@ export default function LeadsPage() {
                       {lead.status_bot === 'ativo' ? (
                         <button
                           onClick={() => assumir(lead.lead_id)}
-                          title="Assumir conversa (pausa a Bianca)"
-                          className="flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 transition-colors px-2 py-1 rounded border border-yellow-500/20 hover:border-yellow-500/40"
+                          title="Assumir conversa (pausa o automático)"
+                          className="flex items-center gap-1 text-xs text-yellow-700 hover:text-yellow-800 transition-colors px-2 py-1 rounded border border-yellow-500/20 hover:border-yellow-500/40"
                         >
                           <UserCheck size={12} /> Assumir
                         </button>
                       ) : (
                         <button
                           onClick={() => reativar(lead.lead_id)}
-                          title="Devolver para a Bianca"
-                          className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 transition-colors px-2 py-1 rounded border border-emerald-500/20 hover:border-emerald-500/40"
+                          title="Devolver para o automático"
+                          className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 transition-colors px-2 py-1 rounded border border-emerald-500/20 hover:border-emerald-500/40"
                         >
                           <BotOff size={12} /> Devolver
                         </button>

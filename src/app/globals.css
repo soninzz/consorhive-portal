@@ -49,72 +49,87 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Consorhive — claro, corporativo/premium: branco levemente acinzentado,
+     grafite pro texto, dourado/âmbar como único acento forte. Violeta e
+     teal entram só em detalhes (glow, charts), nunca competindo com o ouro. */
+  --background: oklch(0.985 0.003 90);
+  --foreground: oklch(0.22 0.015 260);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.22 0.015 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.22 0.015 260);
+  --primary: oklch(0.72 0.15 80);
+  --primary-foreground: oklch(0.2 0.03 80);
+  --secondary: oklch(0.95 0.006 90);
+  --secondary-foreground: oklch(0.22 0.015 260);
+  --muted: oklch(0.96 0.005 90);
+  --muted-foreground: oklch(0.5 0.015 260);
+  --accent: oklch(0.94 0.02 85);
+  --accent-foreground: oklch(0.3 0.04 80);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --border: oklch(0.9 0.006 90);
+  --input: oklch(0.9 0.006 90);
+  --ring: oklch(0.72 0.15 80 / 45%);
+  --chart-1: oklch(0.72 0.15 80);
+  --chart-2: oklch(0.62 0.19 292);
+  --chart-3: oklch(0.7 0.15 190);
+  --chart-4: oklch(0.6 0.18 25);
+  --chart-5: oklch(0.5 0.015 260);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: oklch(0.99 0.002 90);
+  --sidebar-foreground: oklch(0.22 0.015 260);
+  --sidebar-primary: oklch(0.72 0.15 80);
+  --sidebar-primary-foreground: oklch(0.2 0.03 80);
+  --sidebar-accent: oklch(0.95 0.006 90);
+  --sidebar-accent-foreground: oklch(0.22 0.015 260);
+  --sidebar-border: oklch(0.91 0.006 90);
+  --sidebar-ring: oklch(0.72 0.15 80 / 45%);
+
+  --glow-gold: 205 165 60;
+  --glow-violet: 130 100 210;
+  --glow-teal: 40 160 150;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Consorhive — grafite quase-preto com dois acentos: âmbar/mel (hive) e
+     violeta elétrico (dado/tecnologia). Nada de cinza puro do shadcn. */
+  --background: oklch(0.15 0.014 260);
+  --foreground: oklch(0.96 0.01 90);
+  --card: oklch(0.195 0.018 260);
+  --card-foreground: oklch(0.96 0.01 90);
+  --popover: oklch(0.195 0.018 260);
+  --popover-foreground: oklch(0.96 0.01 90);
+  --primary: oklch(0.8 0.16 85);
+  --primary-foreground: oklch(0.16 0.03 85);
+  --secondary: oklch(0.62 0.19 292);
+  --secondary-foreground: oklch(0.97 0.01 90);
+  --muted: oklch(0.24 0.02 260);
+  --muted-foreground: oklch(0.68 0.02 260);
+  --accent: oklch(0.28 0.03 260);
+  --accent-foreground: oklch(0.96 0.01 90);
+  --destructive: oklch(0.65 0.22 25);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.8 0.16 85 / 50%);
+  --chart-1: oklch(0.8 0.16 85);
+  --chart-2: oklch(0.62 0.19 292);
+  --chart-3: oklch(0.7 0.15 190);
+  --chart-4: oklch(0.6 0.18 25);
+  --chart-5: oklch(0.55 0.02 260);
+  --sidebar: oklch(0.13 0.014 260);
+  --sidebar-foreground: oklch(0.96 0.01 90);
+  --sidebar-primary: oklch(0.8 0.16 85);
+  --sidebar-primary-foreground: oklch(0.16 0.03 85);
+  --sidebar-accent: oklch(0.24 0.02 260);
+  --sidebar-accent-foreground: oklch(0.96 0.01 90);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.8 0.16 85 / 50%);
+
+  /* tokens crus pra gradientes/glows (oklch var acima não dá pra usar
+     direto em rgba/box-shadow com opacidade custom) */
+  --glow-gold: 205 165 60;
+  --glow-violet: 150 110 230;
+  --glow-teal: 60 190 180;
 }
 
 @layer base {
@@ -127,4 +142,95 @@
   html {
     @apply font-sans;
   }
+}
+
+/* ── Texturas de fundo — variadas de propósito, não repete o mesmo grid
+   em toda seção. Honeycomb marca a identidade "Hive"; dot-grid e o glow
+   radial quebram a repetição. ────────────────────────────────────────── */
+
+.bg-hive {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(var(--glow-gold), 0.10), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(var(--glow-violet), 0.14), transparent 40%),
+    radial-gradient(circle at 60% 100%, rgba(var(--glow-teal), 0.08), transparent 45%);
+}
+
+.bg-honeycomb {
+  /* pseudo-elemento em vez de mask-image direto: mask-image mascara o
+     elemento INTEIRO (filhos inclusos), não só o background — isso
+     apagava os cards conforme desciam na tela. */
+  position: relative;
+  isolation: isolate;
+}
+
+.bg-honeycomb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  --hc-size: 46px;
+  background-image:
+    linear-gradient(120deg, rgba(30, 25, 15, 0.05) 1px, transparent 1px),
+    linear-gradient(240deg, rgba(30, 25, 15, 0.05) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(30, 25, 15, 0.05) 1px, transparent 1px);
+  background-size: var(--hc-size) calc(var(--hc-size) * 1.732);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 90%);
+}
+
+.bg-dot-grid {
+  background-image: radial-gradient(rgba(30, 25, 15, 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.glow-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  pointer-events: none;
+}
+
+.glow-blob-gold {
+  background: radial-gradient(circle, rgba(var(--glow-gold), 0.35), transparent 70%);
+}
+
+.glow-blob-violet {
+  background: radial-gradient(circle, rgba(var(--glow-violet), 0.32), transparent 70%);
+}
+
+.glow-blob-teal {
+  background: radial-gradient(circle, rgba(var(--glow-teal), 0.28), transparent 70%);
+}
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(30, 25, 15, 0.08);
+  box-shadow: 0 1px 2px rgba(30, 25, 15, 0.04), 0 8px 24px -12px rgba(30, 25, 15, 0.12);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(90deg, oklch(0.62 0.16 75), oklch(0.5 0.15 55));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.06); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(18px, -14px); }
+  100% { transform: translate(0, 0); }
+}
+
+.animate-drift {
+  animation: drift 14s ease-in-out infinite;
 }

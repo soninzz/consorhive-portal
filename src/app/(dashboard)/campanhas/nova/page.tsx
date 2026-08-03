@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase, type Lista, type Template } from '@/lib/supabase';
-import { interpolarTemplate } from '@/lib/utils';
+import { interpolarTemplate, primeiroNome, contarCombinacoesSpintax, gerarMensagemUnica } from '@/lib/utils';
 import { ChevronRight, Zap, Clock, AlertCircle } from 'lucide-react';
 
 function NovaCampanhaForm() {
@@ -23,6 +23,9 @@ function NovaCampanhaForm() {
   const [previewNomes, setPreviewNomes] = useState<string[]>([]);
   const [disparando, setDisparando] = useState(false);
   const [erro, setErro] = useState('');
+  const [disponiveis, setDisponiveis] = useState<number | null>(null);
+  const [modoQuantidade, setModoQuantidade] = useState<'todos' | 'parcial'>('todos');
+  const [quantidade, setQuantidade] = useState('');
 
   useEffect(() => {
     supabase.from('listas').select('*').order('criada_em', { ascending: false }).then(({ data }) => setListas(data ?? []));
@@ -33,8 +36,13 @@ function NovaCampanhaForm() {
     if (listaId) {
       const l = listas.find(x => x.id === listaId) ?? null;
       setListaSelecionada(l);
-      supabase.from('contatos').select('nome').eq('lista_id', listaId).limit(3).then(({ data }) => {
+      setModoQuantidade('todos');
+      setQuantidade('');
+      supabase.from('contatos').select('nome').eq('lista_id', listaId).eq('ja_contactado', false).limit(3).then(({ data }) => {
         setPreviewNomes((data ?? []).map(c => c.nome ?? 'Contato'));
+      });
+      supabase.from('contatos').select('id', { count: 'exact', head: true }).eq('lista_id', listaId).eq('ja_contactado', false).then(({ count }) => {
+        setDisponiveis(count ?? 0);
       });
     }
   }, [listaId, listas]);
@@ -47,6 +55,7 @@ function NovaCampanhaForm() {
 
   async function disparar() {
     if (!listaId || !templateId || !nome.trim()) return;
+    if (modoQuantidade === 'parcial' && !(quantidade.trim() !== '' && parseInt(quantidade, 10) > 0)) return;
     setDisparando(true);
     setErro('');
 
@@ -66,27 +75,54 @@ function NovaCampanhaForm() {
 
       if (error || !campanha) throw new Error(error?.message ?? 'Erro ao criar campanha');
 
-      // 2. Buscar contatos não contactados
-      const { data: contatos } = await supabase
+      // 2. Buscar contatos não contactados (mais antigos primeiro, pra "primeiros N" ser determinístico)
+      let query = supabase
         .from('contatos')
         .select('id, nome, telefone')
         .eq('lista_id', listaId)
         .eq('ja_contactado', false)
-        .not('telefone', 'is', null);
+        .not('telefone', 'is', null)
+        .order('criado_em', { ascending: true });
+
+      const limite = modoQuantidade === 'parcial' ? parseInt(quantidade, 10) : null;
+      if (limite && limite > 0) query = query.limit(limite);
+
+      const { data: contatos } = await query;
 
       if (!contatos || contatos.length === 0) {
         throw new Error('Nenhum contato disponível nesta lista (todos já foram contactados).');
       }
 
-      // 3. Criar registros de disparos pendentes
+      // 3. Monta mensagem única por contato — nunca repete o mesmo texto final
+      // pra números diferentes (é o padrão que derruba número no anti-spam do WhatsApp)
       const corpo = templateSelecionado!.corpo;
-      const disparosPayload = contatos.map(c => ({
-        campanha_id: campanha.id,
-        contato_id: c.id,
-        telefone: c.telefone,
-        mensagem_enviada: interpolarTemplate(corpo, { nome: c.nome ?? 'você' }),
-        status: 'pendente',
-      }));
+      const { data: jaEnviadas } = await supabase.from('disparos').select('mensagem_enviada');
+      const usadas = new Set<string>((jaEnviadas ?? []).map(d => d.mensagem_enviada).filter(Boolean));
+
+      const disparosPayload: { campanha_id: string; contato_id: string; telefone: string; mensagem_enviada: string; status: string }[] = [];
+      let semVariacaoDisponivel = 0;
+      for (const c of contatos) {
+        const mensagem = gerarMensagemUnica(corpo, { nome: primeiroNome(c.nome) ?? 'você' }, usadas);
+        if (!mensagem) {
+          semVariacaoDisponivel++;
+          continue;
+        }
+        disparosPayload.push({
+          campanha_id: campanha.id,
+          contato_id: c.id,
+          telefone: c.telefone,
+          mensagem_enviada: mensagem,
+          status: 'pendente',
+        });
+      }
+
+      if (semVariacaoDisponivel > 0) {
+        await supabase.from('campanhas').delete().eq('id', campanha.id);
+        throw new Error(
+          `O template não tem variações suficientes: ${semVariacaoDisponivel} contato(s) ficariam com mensagem repetida. ` +
+          `Adicione mais opções entre chaves no template, ex: {opção 1|opção 2|opção 3}, e tente de novo.`
+        );
+      }
 
       for (let i = 0; i < disparosPayload.length; i += 500) {
         await supabase.from('disparos').insert(disparosPayload.slice(i, i + 500));
@@ -111,29 +147,33 @@ function NovaCampanhaForm() {
 
   const podeProsseguir1 = nome.trim().length > 0 && listaId;
   const podeProsseguir2 = templateId;
-  const estimativaHoras = listaSelecionada
-    ? Math.ceil((listaSelecionada.total_contatos * 90) / 3600)
-    : 0;
+  const quantidadeValida = modoQuantidade === 'todos' || (
+    quantidade.trim() !== '' && parseInt(quantidade, 10) > 0 && (disponiveis === null || parseInt(quantidade, 10) <= disponiveis)
+  );
+  const quantidadeAlvo = modoQuantidade === 'parcial' && quantidade
+    ? Math.min(parseInt(quantidade, 10) || 0, disponiveis ?? 0)
+    : (disponiveis ?? 0);
+  const estimativaHoras = Math.ceil((quantidadeAlvo * 90) / 3600);
 
   return (
     <div className="flex-1 p-8 max-w-2xl">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-50">Nova Campanha</h2>
-        <p className="text-slate-400 text-sm mt-1">Configure e dispare uma prospecção com a Bianca.</p>
+        <h2 className="text-2xl font-bold text-foreground">Nova Campanha</h2>
+        <p className="text-muted-foreground text-sm mt-1">Configure e dispare uma prospecção como Maikon.</p>
       </div>
 
       <div className="flex items-center gap-2 mb-8">
         {[1, 2, 3].map((p) => (
           <div key={p} className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-              passo === p ? 'bg-emerald-600 text-white' :
-              passo > p ? 'bg-emerald-900 text-emerald-400' :
-              'bg-slate-800 text-slate-500'
+              passo === p ? 'bg-primary text-primary-foreground' :
+              passo > p ? 'bg-emerald-100 text-emerald-700' :
+              'bg-muted text-muted-foreground'
             }`}>{p}</div>
-            {p < 3 && <div className={`h-px w-8 ${passo > p ? 'bg-emerald-700' : 'bg-slate-800'}`} />}
+            {p < 3 && <div className={`h-px w-8 ${passo > p ? 'bg-emerald-700' : 'bg-muted'}`} />}
           </div>
         ))}
-        <span className="ml-2 text-sm text-slate-500">
+        <span className="ml-2 text-sm text-muted-foreground">
           {passo === 1 ? 'Lista e nome' : passo === 2 ? 'Mensagem' : 'Confirmar'}
         </span>
       </div>
@@ -141,26 +181,26 @@ function NovaCampanhaForm() {
       {passo === 1 && (
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Nome da campanha</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Nome da campanha</label>
             <input
               type="text"
               value={nome}
               onChange={e => setNome(e.target.value)}
               placeholder="Ex: Prospecção Imobiliárias SC — Jun/26"
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-200 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
+              className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-foreground text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Lista de contatos</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Lista de contatos</label>
             {listas.length === 0 ? (
-              <div className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-slate-500 text-sm">
-                Nenhuma lista disponível. <a href="/listas" className="text-emerald-400 hover:underline">Importe uma lista primeiro.</a>
+              <div className="bg-card border border-border rounded-lg px-4 py-3 text-muted-foreground text-sm">
+                Nenhuma lista disponível. <a href="/listas" className="text-emerald-600 hover:underline">Importe uma lista primeiro.</a>
               </div>
             ) : (
               <select
                 value={listaId}
                 onChange={e => setListaId(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-primary"
               >
                 <option value="">Selecione uma lista...</option>
                 {listas.map(l => (
@@ -169,7 +209,7 @@ function NovaCampanhaForm() {
               </select>
             )}
             {listaSelecionada && (
-              <p className="text-xs text-slate-500 mt-1.5">
+              <p className="text-xs text-muted-foreground mt-1.5">
                 {listaSelecionada.contactados > 0
                   ? `${listaSelecionada.total_contatos - listaSelecionada.contactados} contatos disponíveis (${listaSelecionada.contactados} já contactados)`
                   : `${listaSelecionada.total_contatos} contatos disponíveis`}
@@ -179,7 +219,7 @@ function NovaCampanhaForm() {
           <button
             onClick={() => setPasso(2)}
             disabled={!podeProsseguir1}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
           >
             Próximo <ChevronRight size={16} />
           </button>
@@ -189,17 +229,26 @@ function NovaCampanhaForm() {
       {passo === 2 && (
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-3">Escolha o template de mensagem</label>
+            <label className="block text-sm font-medium text-foreground mb-3">Escolha o template de mensagem</label>
+            {templates.length === 0 && (
+              <div className="rounded-lg border border-dashed border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                Nenhum template ativo ainda.{' '}
+                <a href="/configuracoes" className="text-primary hover:underline">
+                  Crie um template em Configurações
+                </a>{' '}
+                antes de continuar.
+              </div>
+            )}
             <div className="space-y-3">
               {templates.map(t => (
                 <label key={t.id} className={`block cursor-pointer rounded-xl border p-4 transition-colors ${
-                  templateId === t.id ? 'border-emerald-500 bg-emerald-900/10' : 'border-slate-700 bg-slate-900 hover:border-slate-600'
+                  templateId === t.id ? 'border-emerald-500 bg-emerald-50' : 'border-border bg-card hover:border-border'
                 }`}>
                   <div className="flex items-start gap-3">
                     <input type="radio" name="template" value={t.id} checked={templateId === t.id} onChange={e => setTemplateId(e.target.value)} className="mt-1 accent-emerald-500" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-slate-200 font-medium text-sm">{t.nome}</p>
-                      <p className="text-slate-500 text-xs mt-1 line-clamp-3 whitespace-pre-wrap">{t.corpo}</p>
+                      <p className="text-foreground font-medium text-sm">{t.nome}</p>
+                      <p className="text-muted-foreground text-xs mt-1 line-clamp-3 whitespace-pre-wrap">{t.corpo}</p>
                     </div>
                   </div>
                 </label>
@@ -208,27 +257,43 @@ function NovaCampanhaForm() {
           </div>
 
           {templateId && previewNomes.length > 0 && (
-            <div className="bg-slate-800/50 rounded-xl p-4">
-              <p className="text-xs text-slate-500 mb-3">Preview com contatos reais</p>
-              {previewNomes.slice(0, 1).map((nome, i) => (
-                <div key={i} className="bg-emerald-950/40 border border-emerald-900/30 rounded-lg p-3">
+            <div className="bg-muted/60 rounded-xl p-4 space-y-2">
+              <p className="text-xs text-muted-foreground mb-1">
+                Preview com contatos reais — repare que o texto varia mesmo entre contatos, isso é proposital (evita mensagem repetida)
+              </p>
+              {previewNomes.slice(0, 3).map((nome, i) => (
+                <div key={i} className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
                   <p className="text-xs text-emerald-600 mb-1">Para: {nome}</p>
-                  <p className="text-slate-300 text-sm whitespace-pre-wrap">
-                    {interpolarTemplate(templateSelecionado?.corpo ?? '', { nome })}
+                  <p className="text-foreground text-sm whitespace-pre-wrap">
+                    {interpolarTemplate(templateSelecionado?.corpo ?? '', { nome: primeiroNome(nome) ?? 'você' })}
                   </p>
                 </div>
               ))}
             </div>
           )}
 
+          {templateId && templateSelecionado && (() => {
+            const combinacoes = contarCombinacoesSpintax(templateSelecionado.corpo);
+            const poucaVariacao = combinacoes < (disponiveis ?? 0);
+            return (
+              <div className={`rounded-lg px-4 py-2.5 text-xs flex items-center gap-2 ${poucaVariacao ? 'bg-red-50 border border-red-200 text-red-600' : 'bg-muted/60 text-muted-foreground'}`}>
+                {poucaVariacao && <AlertCircle size={14} className="shrink-0" />}
+                {combinacoes >= 999999
+                  ? 'Variações praticamente ilimitadas para este template.'
+                  : `Este template gera até ${combinacoes.toLocaleString('pt-BR')} mensagem(ns) distinta(s).`}
+                {poucaVariacao && ` Isso é menos que os ${disponiveis} contatos disponíveis — adicione mais opções {a|b|c} no template ou reduza a quantidade disparada.`}
+              </div>
+            );
+          })()}
+
           <div className="flex gap-3">
-            <button onClick={() => setPasso(1)} className="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors">
+            <button onClick={() => setPasso(1)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
               Voltar
             </button>
             <button
               onClick={() => setPasso(3)}
               disabled={!podeProsseguir2}
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
             >
               Próximo <ChevronRight size={16} />
             </button>
@@ -238,32 +303,75 @@ function NovaCampanhaForm() {
 
       {passo === 3 && (
         <div className="space-y-5">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-            <h3 className="text-slate-200 font-semibold">Resumo da campanha</h3>
+          <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+            <h3 className="text-foreground font-semibold">Resumo da campanha</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-slate-500">Nome</p>
-                <p className="text-slate-200 font-medium mt-0.5">{nome}</p>
+                <p className="text-muted-foreground">Nome</p>
+                <p className="text-foreground font-medium mt-0.5">{nome}</p>
               </div>
               <div>
-                <p className="text-slate-500">Lista</p>
-                <p className="text-slate-200 font-medium mt-0.5">{listaSelecionada?.nome}</p>
+                <p className="text-muted-foreground">Lista</p>
+                <p className="text-foreground font-medium mt-0.5">{listaSelecionada?.nome}</p>
               </div>
               <div>
-                <p className="text-slate-500">Contatos</p>
-                <p className="text-slate-200 font-medium mt-0.5">{listaSelecionada?.total_contatos.toLocaleString('pt-BR')}</p>
+                <p className="text-muted-foreground">Disponíveis na lista</p>
+                <p className="text-foreground font-medium mt-0.5">{disponiveis?.toLocaleString('pt-BR') ?? '...'}</p>
               </div>
               <div>
-                <p className="text-slate-500">Template</p>
-                <p className="text-slate-200 font-medium mt-0.5">{templateSelecionado?.nome}</p>
+                <p className="text-muted-foreground">Template</p>
+                <p className="text-foreground font-medium mt-0.5">{templateSelecionado?.nome}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-xl p-4 flex gap-3">
-            <Clock size={18} className="text-yellow-500 shrink-0 mt-0.5" />
+          <div className="bg-card border border-border rounded-xl p-5 space-y-3">
+            <h3 className="text-foreground font-semibold text-sm">Quantos disparar agora?</h3>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="radio"
+                  name="modoQuantidade"
+                  checked={modoQuantidade === 'todos'}
+                  onChange={() => setModoQuantidade('todos')}
+                  className="accent-primary"
+                />
+                Todos os disponíveis agora ({disponiveis?.toLocaleString('pt-BR') ?? '...'})
+              </label>
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="radio"
+                  name="modoQuantidade"
+                  checked={modoQuantidade === 'parcial'}
+                  onChange={() => setModoQuantidade('parcial')}
+                  className="accent-primary"
+                />
+                Só os primeiros
+                <input
+                  type="number"
+                  min={1}
+                  max={disponiveis ?? undefined}
+                  value={quantidade}
+                  onFocus={() => setModoQuantidade('parcial')}
+                  onChange={e => { setQuantidade(e.target.value); setModoQuantidade('parcial'); }}
+                  placeholder="ex: 10"
+                  className="w-24 bg-background border border-border rounded-lg px-2 py-1 text-sm text-foreground focus:outline-none focus:border-primary"
+                />
+                contatos
+              </label>
+            </div>
+            {modoQuantidade === 'parcial' && !quantidadeValida && (
+              <p className="text-xs text-red-600">Informe um número entre 1 e {disponiveis ?? 0}.</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Depois dá pra voltar em Campanhas e continuar o resto da lista com outra quantidade, quando quiser.
+            </p>
+          </div>
+
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex gap-3">
+            <Clock size={18} className="text-yellow-600 shrink-0 mt-0.5" />
             <div>
-              <p className="text-yellow-400 text-sm font-medium">Ritmo anti-ban</p>
+              <p className="text-yellow-700 text-sm font-medium">Ritmo anti-ban</p>
               <p className="text-yellow-600 text-xs mt-1">
                 Disparos com 60–90s de intervalo. Estimativa: ~{estimativaHoras}h para completar a lista.
                 Não ultrapassa 300 mensagens/dia.
@@ -272,20 +380,20 @@ function NovaCampanhaForm() {
           </div>
 
           {erro && (
-            <div className="bg-red-900/20 border border-red-700/30 rounded-xl p-4 flex gap-3">
-              <AlertCircle size={18} className="text-red-400 shrink-0" />
-              <p className="text-red-400 text-sm">{erro}</p>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3">
+              <AlertCircle size={18} className="text-red-600 shrink-0" />
+              <p className="text-red-600 text-sm">{erro}</p>
             </div>
           )}
 
           <div className="flex gap-3">
-            <button onClick={() => setPasso(2)} className="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors">
+            <button onClick={() => setPasso(2)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
               Voltar
             </button>
             <button
               onClick={disparar}
-              disabled={disparando}
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
+              disabled={disparando || !quantidadeValida}
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
             >
               <Zap size={16} />
               {disparando ? 'Iniciando...' : 'Iniciar Campanha'}

@@ -67,6 +67,8 @@ export type Lead = {
   responsavel_humano: string | null;
   dor_principal: string | null;
   ultima_interacao: string;
+  follow_up_em: string | null;
+  follow_up_nota: string | null;
 };
 
 export type BaseConhecimento = {

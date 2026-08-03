@@ -17,7 +17,7 @@ export function interpolarTemplate(template: string, vars: Record<string, string
 }
 
 export function formatarData(iso: string): string {
-  if (!iso) return '—';
+  if (!iso) return 'ï¿½';
   return new Date(iso).toLocaleDateString('pt-BR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',

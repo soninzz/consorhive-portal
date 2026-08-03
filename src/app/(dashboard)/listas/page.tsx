@@ -140,12 +140,12 @@ export default function ListasPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-50">Listas de Contatos</h2>
-          <p className="text-slate-400 text-sm mt-1">Importe suas listas para iniciar campanhas de prospecção.</p>
+          <h2 className="text-2xl font-bold text-foreground">Listas de Contatos</h2>
+          <p className="text-muted-foreground text-sm mt-1">Importe suas listas para iniciar campanhas de prospecção.</p>
         </div>
         <button
           onClick={() => setModalAberto(true)}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
         >
           <Upload size={16} />
           Importar Lista
@@ -154,64 +154,64 @@ export default function ListasPage() {
 
       {/* Tabela */}
       {loading ? (
-        <div className="text-slate-500 text-sm">Carregando listas...</div>
+        <div className="text-muted-foreground text-sm">Carregando listas...</div>
       ) : listas.length === 0 ? (
-        <div className="border border-dashed border-slate-700 rounded-xl p-16 text-center">
-          <List size={40} className="mx-auto text-slate-600 mb-4" />
-          <p className="text-slate-400 font-medium">Nenhuma lista ainda</p>
-          <p className="text-slate-600 text-sm mt-1">Importe um arquivo Excel ou CSV para começar.</p>
+        <div className="border border-dashed border-border rounded-xl p-16 text-center">
+          <List size={40} className="mx-auto text-muted-foreground mb-4" />
+          <p className="text-muted-foreground font-medium">Nenhuma lista ainda</p>
+          <p className="text-muted-foreground text-sm mt-1">Importe um arquivo Excel ou CSV para começar.</p>
           <button
             onClick={() => setModalAberto(true)}
-            className="mt-4 text-emerald-400 text-sm hover:text-emerald-300"
+            className="mt-4 text-emerald-600 text-sm hover:text-emerald-700"
           >
             Importar agora →
           </button>
         </div>
       ) : (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-800">
-                <th className="text-left px-6 py-3 text-slate-400 font-medium">Nome</th>
-                <th className="text-left px-6 py-3 text-slate-400 font-medium">Origem</th>
-                <th className="text-right px-6 py-3 text-slate-400 font-medium">Contatos</th>
-                <th className="text-right px-6 py-3 text-slate-400 font-medium">Contactados</th>
-                <th className="text-left px-6 py-3 text-slate-400 font-medium">Criada em</th>
+              <tr className="border-b border-border">
+                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Nome</th>
+                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Origem</th>
+                <th className="text-right px-6 py-3 text-muted-foreground font-medium">Contatos</th>
+                <th className="text-right px-6 py-3 text-muted-foreground font-medium">Contactados</th>
+                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Criada em</th>
                 <th className="px-6 py-3" />
               </tr>
             </thead>
             <tbody>
               {listas.map((lista) => (
-                <tr key={lista.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                  <td className="px-6 py-4 text-slate-200 font-medium">{lista.nome}</td>
+                <tr key={lista.id} className="border-b border-border/60 hover:bg-muted/50 transition-colors">
+                  <td className="px-6 py-4 text-foreground font-medium">{lista.nome}</td>
                   <td className="px-6 py-4">
-                    <span className="bg-slate-800 text-slate-400 text-xs px-2 py-1 rounded capitalize">{lista.origem}</span>
+                    <span className="bg-muted text-muted-foreground text-xs px-2 py-1 rounded capitalize">{lista.origem}</span>
                   </td>
-                  <td className="px-6 py-4 text-right text-slate-300">
+                  <td className="px-6 py-4 text-right text-foreground">
                     <span className="flex items-center justify-end gap-1">
-                      <Users size={14} className="text-slate-500" />
+                      <Users size={14} className="text-muted-foreground" />
                       {lista.total_contatos.toLocaleString('pt-BR')}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right text-slate-400">
+                  <td className="px-6 py-4 text-right text-muted-foreground">
                     {lista.contactados > 0 ? (
-                      <span className="text-emerald-400">{lista.contactados}</span>
+                      <span className="text-emerald-600">{lista.contactados}</span>
                     ) : (
-                      <span className="text-slate-600">—</span>
+                      <span className="text-muted-foreground">—</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-slate-500">{formatarData(lista.criada_em)}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{formatarData(lista.criada_em)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <a
                         href={`/campanhas/nova?lista=${lista.id}`}
-                        className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+                        className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 transition-colors"
                       >
                         Usar em campanha <ArrowRight size={12} />
                       </a>
                       <button
                         onClick={() => excluirLista(lista.id)}
-                        className="text-slate-600 hover:text-red-400 transition-colors"
+                        className="text-muted-foreground hover:text-red-600 transition-colors"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -227,36 +227,36 @@ export default function ListasPage() {
       {/* Modal de Importação */}
       {modalAberto && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-800">
-              <h3 className="text-lg font-semibold text-slate-50">Importar Lista</h3>
-              <p className="text-slate-400 text-sm mt-1">Suporta .xlsx e .csv. Máximo 5.000 contatos.</p>
+          <div className="bg-card border border-border rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-border">
+              <h3 className="text-lg font-semibold text-foreground">Importar Lista</h3>
+              <p className="text-muted-foreground text-sm mt-1">Suporta .xlsx e .csv. Máximo 5.000 contatos.</p>
             </div>
 
             <div className="p-6 space-y-5">
               {/* Nome */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Nome da lista</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Nome da lista</label>
                 <input
                   type="text"
                   value={nomeLista}
                   onChange={e => setNomeLista(e.target.value)}
                   placeholder="Ex: Imobiliárias Floripa — Jun/26"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Upload */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Arquivo</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Arquivo</label>
                 {!arquivo ? (
                   <div
                     onClick={() => fileRef.current?.click()}
-                    className="border-2 border-dashed border-slate-700 rounded-xl p-8 text-center cursor-pointer hover:border-emerald-600 transition-colors"
+                    className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-emerald-600 transition-colors"
                   >
-                    <Upload size={24} className="mx-auto text-slate-600 mb-2" />
-                    <p className="text-slate-400 text-sm">Clique para selecionar o arquivo</p>
-                    <p className="text-slate-600 text-xs mt-1">.xlsx ou .csv</p>
+                    <Upload size={24} className="mx-auto text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground text-sm">Clique para selecionar o arquivo</p>
+                    <p className="text-muted-foreground text-xs mt-1">.xlsx ou .csv</p>
                     <input
                       ref={fileRef}
                       type="file"
@@ -266,9 +266,9 @@ export default function ListasPage() {
                     />
                   </div>
                 ) : (
-                  <div className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 flex items-center justify-between">
-                    <span className="text-slate-300 text-sm">{arquivo.name}</span>
-                    <button onClick={() => { setArquivo(null); setColunas([]); setPreview([]); }} className="text-slate-500 hover:text-red-400 text-xs">Remover</button>
+                  <div className="bg-muted border border-border rounded-lg px-4 py-3 flex items-center justify-between">
+                    <span className="text-foreground text-sm">{arquivo.name}</span>
+                    <button onClick={() => { setArquivo(null); setColunas([]); setPreview([]); }} className="text-muted-foreground hover:text-red-600 text-xs">Remover</button>
                   </div>
                 )}
               </div>
@@ -276,25 +276,25 @@ export default function ListasPage() {
               {/* Mapeamento de colunas */}
               {colunas.length > 0 && (
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-slate-300">Mapear colunas</p>
+                  <p className="text-sm font-medium text-foreground">Mapear colunas</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs text-slate-500 mb-1">Coluna do Nome</label>
+                      <label className="block text-xs text-muted-foreground mb-1">Coluna do Nome</label>
                       <select
                         value={colunaMap.nome}
                         onChange={e => setColunaMap(p => ({ ...p, nome: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-300 text-sm focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-primary"
                       >
                         <option value="">(opcional)</option>
                         {colunas.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs text-slate-500 mb-1">Coluna do Telefone *</label>
+                      <label className="block text-xs text-muted-foreground mb-1">Coluna do Telefone *</label>
                       <select
                         value={colunaMap.telefone}
                         onChange={e => setColunaMap(p => ({ ...p, telefone: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-300 text-sm focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-primary"
                       >
                         <option value="">Selecione...</option>
                         {colunas.map(c => <option key={c} value={c}>{c}</option>)}
@@ -304,17 +304,17 @@ export default function ListasPage() {
 
                   {/* Preview */}
                   {preview.length > 0 && (
-                    <div className="bg-slate-800/50 rounded-lg p-3 overflow-x-auto">
-                      <p className="text-xs text-slate-500 mb-2">Preview (3 primeiras linhas)</p>
+                    <div className="bg-muted/60 rounded-lg p-3 overflow-x-auto">
+                      <p className="text-xs text-muted-foreground mb-2">Preview (3 primeiras linhas)</p>
                       <table className="text-xs w-full">
                         <thead>
-                          <tr>{colunas.slice(0, 4).map(c => <th key={c} className="text-left pr-4 text-slate-500 pb-1">{c}</th>)}</tr>
+                          <tr>{colunas.slice(0, 4).map(c => <th key={c} className="text-left pr-4 text-muted-foreground pb-1">{c}</th>)}</tr>
                         </thead>
                         <tbody>
                           {preview.map((row, i) => (
                             <tr key={i}>
                               {colunas.slice(0, 4).map(c => (
-                                <td key={c} className="pr-4 text-slate-400 pb-1 truncate max-w-[120px]">{row[c]}</td>
+                                <td key={c} className="pr-4 text-muted-foreground pb-1 truncate max-w-[120px]">{row[c]}</td>
                               ))}
                             </tr>
                           ))}
@@ -327,37 +327,37 @@ export default function ListasPage() {
 
               {/* Resultado */}
               {resultado && (
-                <div className="bg-slate-800 rounded-xl p-4 space-y-2">
-                  <p className="text-sm font-medium text-slate-200 mb-3">Importação concluída</p>
+                <div className="bg-muted rounded-xl p-4 space-y-2">
+                  <p className="text-sm font-medium text-foreground mb-3">Importação concluída</p>
                   <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle size={16} className="text-emerald-400" />
-                    <span className="text-slate-300">{resultado.importados} contatos importados</span>
+                    <CheckCircle size={16} className="text-emerald-600" />
+                    <span className="text-foreground">{resultado.importados} contatos importados</span>
                   </div>
                   {resultado.invalidos > 0 && (
                     <div className="flex items-center gap-2 text-sm">
-                      <XCircle size={16} className="text-red-400" />
-                      <span className="text-slate-400">{resultado.invalidos} telefones inválidos ignorados</span>
+                      <XCircle size={16} className="text-red-600" />
+                      <span className="text-muted-foreground">{resultado.invalidos} telefones inválidos ignorados</span>
                     </div>
                   )}
                   {resultado.duplicados > 0 && (
                     <div className="flex items-center gap-2 text-sm">
-                      <AlertCircle size={16} className="text-yellow-400" />
-                      <span className="text-slate-400">{resultado.duplicados} duplicados ignorados</span>
+                      <AlertCircle size={16} className="text-yellow-700" />
+                      <span className="text-muted-foreground">{resultado.duplicados} duplicados ignorados</span>
                     </div>
                   )}
                 </div>
               )}
             </div>
 
-            <div className="p-6 border-t border-slate-800 flex justify-end gap-3">
-              <button onClick={fecharModal} className="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors">
+            <div className="p-6 border-t border-border flex justify-end gap-3">
+              <button onClick={fecharModal} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {resultado ? 'Fechar' : 'Cancelar'}
               </button>
               {!resultado && (
                 <button
                   onClick={importar}
                   disabled={!arquivo || !colunaMap.telefone || !nomeLista.trim() || importando}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
+                  className="px-5 py-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground text-sm font-medium rounded-lg transition-colors"
                 >
                   {importando ? 'Importando...' : 'Importar'}
                 </button>

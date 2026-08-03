@@ -153,25 +153,25 @@ export default function BaseConhecimentoPage() {
   const percentual = Math.round((chars / limiteMax) * 100);
 
   if (loading) {
-    return <div className="p-8 text-slate-500 text-sm">Carregando...</div>;
+    return <div className="p-8 text-muted-foreground text-sm">Carregando...</div>;
   }
 
   return (
     <div className="flex-1 flex flex-col h-screen">
       {/* Header */}
-      <div className="px-8 py-5 border-b border-slate-800 flex items-center justify-between">
+      <div className="px-8 py-5 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <BookOpen size={20} className="text-emerald-500" />
+          <BookOpen size={20} className="text-emerald-600" />
           <div>
-            <h2 className="text-slate-50 font-semibold">Base de Conhecimento</h2>
-            <p className="text-slate-500 text-xs">
+            <h2 className="text-foreground font-semibold">Base de Conhecimento</h2>
+            <p className="text-muted-foreground text-xs">
               Versão {kb?.versao ?? 1} · {formatarData(kb?.criada_em ?? new Date().toISOString())}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           {/* Botão upload */}
-          <label className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+          <label className="flex items-center gap-2 bg-muted hover:bg-muted text-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
             <Upload size={15} />
             {uploading ? 'Processando...' : 'Importar documento'}
             <input
@@ -185,7 +185,7 @@ export default function BaseConhecimentoPage() {
           </label>
 
           {salvo && (
-            <div className="flex items-center gap-1.5 text-emerald-400 text-sm">
+            <div className="flex items-center gap-1.5 text-emerald-600 text-sm">
               <CheckCircle size={14} />
               Salvo
             </div>
@@ -193,7 +193,7 @@ export default function BaseConhecimentoPage() {
           <button
             onClick={salvar}
             disabled={salvando || !alterado}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
           >
             <Save size={15} />
             {salvando ? 'Salvando...' : 'Salvar nova versão'}
@@ -203,18 +203,18 @@ export default function BaseConhecimentoPage() {
 
       {/* Alertas */}
       {alterado && (
-        <div className="px-8 py-2 bg-yellow-900/20 border-b border-yellow-800/30 text-yellow-400 text-xs">
+        <div className="px-8 py-2 bg-yellow-50 border-b border-yellow-200 text-yellow-700 text-xs">
           ⚠ Alterações não salvas — clique em "Salvar nova versão" para publicar.
         </div>
       )}
       {uploadErro && (
-        <div className="px-8 py-2 bg-red-900/20 border-b border-red-800/30 text-red-400 text-xs flex items-center justify-between">
+        <div className="px-8 py-2 bg-red-50 border-b border-red-200 text-red-700 text-xs flex items-center justify-between">
           <span>❌ {uploadErro}</span>
           <button onClick={() => setUploadErro('')}><X size={12} /></button>
         </div>
       )}
       {uploading && (
-        <div className="px-8 py-2 bg-blue-900/20 border-b border-blue-800/30 text-blue-400 text-xs flex items-center gap-2">
+        <div className="px-8 py-2 bg-blue-50 border-b border-blue-200 text-blue-700 text-xs flex items-center gap-2">
           <FileText size={12} className="animate-pulse" />
           Extraindo texto de {docNome}...
         </div>
@@ -226,14 +226,14 @@ export default function BaseConhecimentoPage() {
           <textarea
             value={conteudo}
             onChange={e => { setConteudo(e.target.value); setAlterado(true); }}
-            className="flex-1 bg-slate-950 text-slate-300 text-sm font-mono p-6 resize-none focus:outline-none leading-relaxed"
-            placeholder="Escreva aqui o documento que vai treinar a Bianca, ou importe um PDF/TXT..."
+            className="flex-1 bg-background text-foreground text-sm font-mono p-6 resize-none focus:outline-none leading-relaxed"
+            placeholder="Escreva aqui o documento que vai treinar o Maikon, ou importe um PDF/TXT..."
             spellCheck={false}
           />
-          <div className="px-6 py-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-600">
+          <div className="px-6 py-2 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
             <span>{palavras} palavras · {chars.toLocaleString('pt-BR')} caracteres</span>
             <div className="flex items-center gap-2">
-              <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${percentual > 80 ? 'bg-yellow-500' : 'bg-emerald-600'}`}
                   style={{ width: `${Math.min(100, percentual)}%` }}
@@ -245,45 +245,45 @@ export default function BaseConhecimentoPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="w-72 border-l border-slate-800 flex flex-col overflow-y-auto">
-          <div className="p-5 border-b border-slate-800">
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-3">Formatos suportados</p>
-            <ul className="space-y-2 text-xs text-slate-500">
-              <li>📄 <strong className="text-slate-400">PDF</strong> — extração automática via IA</li>
-              <li>📝 <strong className="text-slate-400">TXT / MD</strong> — importação direta</li>
-              <li className="pt-1 border-t border-slate-800">O conteúdo é adicionado ao final do texto atual</li>
+        <div className="w-72 border-l border-border flex flex-col overflow-y-auto">
+          <div className="p-5 border-b border-border">
+            <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-3">Formatos suportados</p>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li>📄 <strong className="text-muted-foreground">PDF</strong> — extração automática via IA</li>
+              <li>📝 <strong className="text-muted-foreground">TXT / MD</strong> — importação direta</li>
+              <li className="pt-1 border-t border-border">O conteúdo é adicionado ao final do texto atual</li>
             </ul>
           </div>
 
-          <div className="p-5 border-b border-slate-800">
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-3">Dicas</p>
-            <ul className="space-y-2 text-xs text-slate-500">
-              <li>Use <code className="text-slate-400 bg-slate-800 px-1 rounded"># Título</code> para organizar seções</li>
-              <li>Defina claramente o tom e o que a Bianca NUNCA deve fazer</li>
+          <div className="p-5 border-b border-border">
+            <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-3">Dicas</p>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li>Use <code className="text-muted-foreground bg-muted px-1 rounded"># Título</code> para organizar seções</li>
+              <li>Defina claramente o tom e o que o Maikon NUNCA deve fazer</li>
               <li>Inclua as principais objeções e como responder</li>
               <li>Atualize sempre que lançar uma nova campanha</li>
             </ul>
           </div>
 
           <div className="p-5">
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-3">Versões anteriores</p>
+            <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-3">Versões anteriores</p>
             {historico.filter(h => !h.ativa).length === 0 ? (
-              <p className="text-slate-600 text-xs">Nenhum histórico ainda.</p>
+              <p className="text-muted-foreground text-xs">Nenhum histórico ainda.</p>
             ) : (
               <div className="space-y-2">
                 {historico.filter(h => !h.ativa).map(h => (
-                  <div key={h.id} className="bg-slate-800/50 rounded-lg p-3">
+                  <div key={h.id} className="bg-muted/60 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-slate-400 text-xs font-medium">v{h.versao}</span>
+                      <span className="text-muted-foreground text-xs font-medium">v{h.versao}</span>
                       <button
                         onClick={() => restaurar(h)}
-                        className="flex items-center gap-1 text-slate-500 hover:text-emerald-400 text-xs transition-colors"
+                        className="flex items-center gap-1 text-muted-foreground hover:text-emerald-600 text-xs transition-colors"
                       >
                         <RotateCcw size={11} /> Restaurar
                       </button>
                     </div>
-                    <p className="text-slate-600 text-xs">{formatarData(h.criada_em)}</p>
-                    <p className="text-slate-600 text-xs mt-1 line-clamp-2">{h.conteudo.slice(0, 80)}...</p>
+                    <p className="text-muted-foreground text-xs">{formatarData(h.criada_em)}</p>
+                    <p className="text-muted-foreground text-xs mt-1 line-clamp-2">{h.conteudo.slice(0, 80)}...</p>
                   </div>
                 ))}
               </div>

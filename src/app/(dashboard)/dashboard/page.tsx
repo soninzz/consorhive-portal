@@ -1,9 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, MessageSquareText, PhoneForwarded, Activity, RefreshCw } from "lucide-react";
 import { supabase } from '@/lib/supabase';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 14 },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.06, duration: 0.4, ease: 'easeOut' as const },
+  }),
+};
 
 type DashboardStats = {
   totalLeads: number;
@@ -89,15 +99,47 @@ export default function DashboardPage() {
     return `Há ${Math.floor(diff / 86400)}d`;
   }
 
+  const kpis = [
+    {
+      label: 'Leads em Prospecção',
+      value: loading ? '...' : stats.totalLeads.toLocaleString('pt-BR'),
+      hint: 'Total de leads no sistema',
+      icon: Users,
+      accent: 'text-primary',
+    },
+    {
+      label: 'Conversas Ativas (Automático)',
+      value: loading ? '...' : stats.conversasAtivas,
+      hint: 'Bot ativo respondendo',
+      icon: MessageSquareText,
+      accent: 'text-secondary',
+    },
+    {
+      label: 'Aguardando Consultor',
+      value: loading ? '...' : stats.aguardandoConsultor,
+      hint: 'Leads aquecidos aguardando contato',
+      icon: PhoneForwarded,
+      accent: 'text-emerald-600',
+      valueClass: 'text-emerald-600',
+    },
+    {
+      label: 'Taxa de Engajamento',
+      value: loading ? '...' : `${stats.taxaResposta}%`,
+      hint: 'Leads que avançaram na qualificação',
+      icon: Activity,
+      accent: 'text-primary',
+    },
+  ];
+
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
+    <div className="relative flex-1 space-y-6 bg-honeycomb p-8 pt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-50">Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-slate-400">Visão Geral da Operação</span>
+          <span className="text-sm text-muted-foreground">Visão Geral da Operação</span>
           <button
             onClick={carregarDados}
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+            className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             Atualizar
@@ -106,97 +148,74 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Leads em Prospecção</CardTitle>
-            <Users className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-50">
-              {loading ? '...' : stats.totalLeads.toLocaleString('pt-BR')}
-            </div>
-            <p className="text-xs text-slate-500">Total de leads no sistema</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Conversas Ativas (Bianca)</CardTitle>
-            <MessageSquareText className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-50">
-              {loading ? '...' : stats.conversasAtivas}
-            </div>
-            <p className="text-xs text-slate-500">Bot ativo respondendo</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Aguardando Consultor</CardTitle>
-            <PhoneForwarded className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-400">
-              {loading ? '...' : stats.aguardandoConsultor}
-            </div>
-            <p className="text-xs text-slate-500">Leads aquecidos aguardando contato</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Taxa de Engajamento</CardTitle>
-            <Activity className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-50">
-              {loading ? '...' : `${stats.taxaResposta}%`}
-            </div>
-            <p className="text-xs text-slate-500">Leads que avançaram na qualificação</p>
-          </CardContent>
-        </Card>
+        {kpis.map((kpi, i) => (
+          <motion.div
+            key={kpi.label}
+            custom={i}
+            initial="hidden"
+            animate="show"
+            variants={fadeUp}
+          >
+            <Card className="glass-panel group/kpi relative overflow-hidden border-none transition-transform hover:-translate-y-0.5">
+              <div className="glow-blob glow-blob-gold absolute -right-6 -top-6 h-24 w-24 opacity-0 transition-opacity duration-300 group-hover/kpi:opacity-100" />
+              <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.label}</CardTitle>
+                <kpi.icon className={`h-4 w-4 ${kpi.accent}`} />
+              </CardHeader>
+              <CardContent className="relative">
+                <div className={`text-2xl font-bold ${kpi.valueClass ?? 'text-foreground'}`}>
+                  {kpi.value}
+                </div>
+                <p className="text-xs text-muted-foreground">{kpi.hint}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 bg-slate-900 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-slate-50">Performance de Disparos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[250px] w-full rounded-md border border-dashed border-slate-700 flex items-center justify-center text-slate-500 text-sm">
-              Gráfico disponível após primeira campanha disparada
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-3 bg-slate-900 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-slate-50">Últimos Handoffs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p className="text-slate-500 text-sm">Carregando...</p>
-            ) : handoffs.length === 0 ? (
-              <p className="text-slate-500 text-sm">Nenhum handoff ainda.</p>
-            ) : (
-              <div className="space-y-6">
-                {handoffs.map((h) => (
-                  <div key={h.lead_id} className="flex items-center">
-                    <div className="ml-4 space-y-1">
-                      <p className="text-sm font-medium text-slate-200">{h.nome}</p>
-                      <p className="text-xs text-slate-500">Aguardando consultor</p>
-                    </div>
-                    <div className="ml-auto text-sm text-emerald-400">
-                      {tempoRelativo(h.updated_at)}
-                    </div>
-                  </div>
-                ))}
+        <motion.div custom={4} initial="hidden" animate="show" variants={fadeUp} className="lg:col-span-4">
+          <Card className="glass-panel border-none">
+            <CardHeader>
+              <CardTitle className="text-foreground">Performance de Disparos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex h-[250px] w-full items-center justify-center rounded-md border border-dashed border-border bg-muted/40 text-sm text-muted-foreground">
+                Gráfico disponível após primeira campanha disparada
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div custom={5} initial="hidden" animate="show" variants={fadeUp} className="lg:col-span-3">
+          <Card className="glass-panel h-full border-none">
+            <CardHeader>
+              <CardTitle className="text-foreground">Últimos Handoffs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <p className="text-sm text-muted-foreground">Carregando...</p>
+              ) : handoffs.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum handoff ainda.</p>
+              ) : (
+                <div className="space-y-5">
+                  {handoffs.map((h) => (
+                    <div key={h.lead_id} className="flex items-center">
+                      <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                      <div className="ml-3 space-y-1">
+                        <p className="text-sm font-medium text-foreground">{h.nome}</p>
+                        <p className="text-xs text-muted-foreground">Aguardando consultor</p>
+                      </div>
+                      <div className="ml-auto text-sm text-emerald-600">
+                        {tempoRelativo(h.updated_at)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
