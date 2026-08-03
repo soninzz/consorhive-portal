@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { supabase, type Campanha } from '@/lib/supabase';
 import { primeiroNome, gerarMensagemUnica } from '@/lib/utils';
 import { corStatus, formatarData } from '@/lib/utils';
-import { Zap, Plus, Pause, RotateCcw, XCircle, BarChart2, ChevronRight, AlertCircle } from 'lucide-react';
+import { Zap, Plus, Pause, RotateCcw, XCircle, BarChart2, ChevronRight, AlertCircle, Trash2 } from 'lucide-react';
 
 type CampanhaComFila = Campanha & { restantes: number; naFila: number };
 
@@ -140,6 +140,13 @@ export default function CampanhasPage() {
     carregar();
   }
 
+  async function excluirCampanha(c: CampanhaComFila) {
+    if (!confirm(`Excluir "${c.nome}" da lista? Isso remove o histórico de disparos dela permanentemente.`)) return;
+    await supabase.from('disparos').delete().eq('campanha_id', c.id);
+    await supabase.from('campanhas').delete().eq('id', c.id);
+    setCampanhas(prev => prev.filter(x => x.id !== c.id));
+  }
+
   const labelStatus: Record<string, string> = {
     rascunho: 'Rascunho',
     rodando: 'Rodando',
@@ -214,6 +221,11 @@ export default function CampanhasPage() {
                   {c.status !== 'cancelada' && c.naFila === 0 && c.restantes > 0 && (
                     <button onClick={() => abrirContinuar(c)} className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg border border-primary/30 hover:border-primary/50">
                       <ChevronRight size={13} /> Continuar disparo ({c.restantes} restantes)
+                    </button>
+                  )}
+                  {(c.status === 'concluida' || c.status === 'cancelada') && (
+                    <button onClick={() => excluirCampanha(c)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg border border-border hover:border-red-500/30" title="Excluir da lista">
+                      <Trash2 size={13} /> Excluir
                     </button>
                   )}
                 </div>
