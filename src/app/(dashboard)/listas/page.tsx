@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import { supabase, type Lista } from '@/lib/supabase';
 import { normalizarTelefone, extrairDDD, formatarData } from '@/lib/utils';
 import { Upload, List, Trash2, ArrowRight, Users, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { useConfirm } from '@/hooks/use-confirm';
 
 type ImportResult = {
   importados: number;
@@ -24,6 +25,7 @@ export default function ListasPage() {
   const [importando, setImportando] = useState(false);
   const [resultado, setResultado] = useState<ImportResult | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   useEffect(() => { carregarListas(); }, []);
 
@@ -129,10 +131,17 @@ export default function ListasPage() {
     setResultado(null);
   }
 
-  async function excluirLista(id: string) {
-    if (!confirm('Excluir esta lista e todos os seus contatos?')) return;
-    await supabase.from('listas').delete().eq('id', id);
-    carregarListas();
+  function excluirLista(id: string) {
+    confirm({
+      title: 'Excluir lista',
+      description: 'Excluir esta lista e todos os seus contatos?',
+      confirmLabel: 'Excluir',
+      tone: 'danger',
+      onConfirm: async () => {
+        await supabase.from('listas').delete().eq('id', id);
+        carregarListas();
+      },
+    });
   }
 
   return (
@@ -366,6 +375,8 @@ export default function ListasPage() {
           </div>
         </div>
       )}
+
+      {confirmDialog}
     </div>
   );
 }

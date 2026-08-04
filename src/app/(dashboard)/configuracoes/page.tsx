@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { contarCombinacoesSpintax } from '@/lib/utils';
 import { Settings, Save, CheckCircle, Plus, Trash2, Eye, EyeOff, AlertTriangle, Sparkles, Pencil, X } from 'lucide-react';
+import { useConfirm } from '@/hooks/use-confirm';
 
 type Template = {
   id: string;
@@ -33,6 +34,7 @@ export default function ConfiguracoesPage() {
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
   const [gerandoEdicao, setGerandoEdicao] = useState(false);
   const [erroGerarEdicao, setErroGerarEdicao] = useState('');
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   // Configurações Evolution
   const [evoUrl] = useState('https://evo.feravre.com');
@@ -66,10 +68,17 @@ export default function ConfiguracoesPage() {
     carregarTemplates();
   }
 
-  async function deletarTemplate(id: string) {
-    if (!confirm('Deletar este template?')) return;
-    await supabase.from('templates_mensagem').delete().eq('id', id);
-    carregarTemplates();
+  function deletarTemplate(id: string) {
+    confirm({
+      title: 'Deletar template',
+      description: 'Deletar este template? Campanhas já criadas com ele não são afetadas.',
+      confirmLabel: 'Deletar',
+      tone: 'danger',
+      onConfirm: async () => {
+        await supabase.from('templates_mensagem').delete().eq('id', id);
+        carregarTemplates();
+      },
+    });
   }
 
   async function gerarVariacoesIA(corpo: string): Promise<string> {
@@ -427,6 +436,8 @@ export default function ConfiguracoesPage() {
           </div>
         )}
       </div>
+
+      {confirmDialog}
     </div>
   );
 }

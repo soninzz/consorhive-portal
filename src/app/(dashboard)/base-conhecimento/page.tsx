@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase, type BaseConhecimento } from '@/lib/supabase';
 import { formatarData } from '@/lib/utils';
 import { Save, RotateCcw, BookOpen, CheckCircle, Upload, FileText, X } from 'lucide-react';
+import { useConfirm } from '@/hooks/use-confirm';
 
 export default function BaseConhecimentoPage() {
   const [kb, setKb] = useState<BaseConhecimento | null>(null);
@@ -17,6 +18,7 @@ export default function BaseConhecimentoPage() {
   const [uploadErro, setUploadErro] = useState('');
   const [docNome, setDocNome] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   useEffect(() => { carregar(); }, []);
 
@@ -70,10 +72,16 @@ export default function BaseConhecimentoPage() {
     carregar();
   }
 
-  async function restaurar(versao: BaseConhecimento) {
-    if (!confirm(`Restaurar versão ${versao.versao}? Isso criará uma nova versão com o conteúdo anterior.`)) return;
-    setConteudo(versao.conteudo);
-    setAlterado(true);
+  function restaurar(versao: BaseConhecimento) {
+    confirm({
+      title: 'Restaurar versão',
+      description: `Restaurar versão ${versao.versao}? Isso criará uma nova versão com o conteúdo anterior.`,
+      confirmLabel: 'Restaurar',
+      onConfirm: () => {
+        setConteudo(versao.conteudo);
+        setAlterado(true);
+      },
+    });
   }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -291,6 +299,8 @@ export default function BaseConhecimentoPage() {
           </div>
         </div>
       </div>
+
+      {confirmDialog}
     </div>
   );
 }

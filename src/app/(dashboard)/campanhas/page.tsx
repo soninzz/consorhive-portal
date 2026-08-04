@@ -6,6 +6,7 @@ import { supabase, type Campanha } from '@/lib/supabase';
 import { primeiroNome, gerarMensagemUnica } from '@/lib/utils';
 import { corStatus, formatarData } from '@/lib/utils';
 import { Zap, Plus, Pause, RotateCcw, XCircle, BarChart2, ChevronRight, AlertCircle, Trash2 } from 'lucide-react';
+import { useConfirm } from '@/hooks/use-confirm';
 
 type CampanhaComFila = Campanha & { restantes: number; naFila: number };
 
@@ -16,6 +17,7 @@ export default function CampanhasPage() {
   const [continuarQtd, setContinuarQtd] = useState('');
   const [continuando, setContinuando] = useState(false);
   const [erroContinuar, setErroContinuar] = useState('');
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   useEffect(() => { carregar(); }, []);
 
@@ -133,18 +135,32 @@ export default function CampanhasPage() {
     carregar();
   }
 
-  async function cancelar(id: string) {
-    if (!confirm('Cancelar esta campanha? Os disparos pendentes serão removidos.')) return;
-    await supabase.from('campanhas').update({ status: 'cancelada' }).eq('id', id);
-    await supabase.from('disparos').delete().eq('campanha_id', id).eq('status', 'pendente');
-    carregar();
+  function cancelar(id: string) {
+    confirm({
+      title: 'Cancelar campanha',
+      description: 'Cancelar esta campanha? Os disparos pendentes serão removidos.',
+      confirmLabel: 'Cancelar campanha',
+      tone: 'danger',
+      onConfirm: async () => {
+        await supabase.from('campanhas').update({ status: 'cancelada' }).eq('id', id);
+        await supabase.from('disparos').delete().eq('campanha_id', id).eq('status', 'pendente');
+        carregar();
+      },
+    });
   }
 
-  async function excluirCampanha(c: CampanhaComFila) {
-    if (!confirm(`Excluir "${c.nome}" da lista? Isso remove o histórico de disparos dela permanentemente.`)) return;
-    await supabase.from('disparos').delete().eq('campanha_id', c.id);
-    await supabase.from('campanhas').delete().eq('id', c.id);
-    setCampanhas(prev => prev.filter(x => x.id !== c.id));
+  function excluirCampanha(c: CampanhaComFila) {
+    confirm({
+      title: 'Excluir campanha',
+      description: `Excluir "${c.nome}" da lista? Isso remove o histórico de disparos dela permanentemente.`,
+      confirmLabel: 'Excluir',
+      tone: 'danger',
+      onConfirm: async () => {
+        await supabase.from('disparos').delete().eq('campanha_id', c.id);
+        await supabase.from('campanhas').delete().eq('id', c.id);
+        setCampanhas(prev => prev.filter(x => x.id !== c.id));
+      },
+    });
   }
 
   const labelStatus: Record<string, string> = {
@@ -315,6 +331,8 @@ export default function CampanhasPage() {
           </div>
         );
       })()}
+
+      {confirmDialog}
     </div>
   );
 }
