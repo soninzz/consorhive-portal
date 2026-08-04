@@ -3,8 +3,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase, type BaseConhecimento } from '@/lib/supabase';
 import { formatarData } from '@/lib/utils';
-import { Save, RotateCcw, BookOpen, CheckCircle, Upload, FileText, X } from 'lucide-react';
+import { Save, RotateCcw, BookOpen, CheckCircle, Upload, FileText, X, MessageSquare, Send, Trash2, Bot, Flame } from 'lucide-react';
 import { useConfirm } from '@/hooks/use-confirm';
+
+type MensagemTeste = {
+  role: 'user' | 'assistant';
+  content: string;
+  intencao?: string;
+  score?: number;
+  handoff?: boolean;
+};
 
 export default function BaseConhecimentoPage() {
   const [kb, setKb] = useState<BaseConhecimento | null>(null);
@@ -19,6 +27,14 @@ export default function BaseConhecimentoPage() {
   const [docNome, setDocNome] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const { confirm, dialog: confirmDialog } = useConfirm();
+
+  // Simulação (testar a KB em edição sem afetar leads reais)
+  const [testeAberto, setTesteAberto] = useState(false);
+  const [testeHistorico, setTesteHistorico] = useState<MensagemTeste[]>([]);
+  const [testeQualificacao, setTesteQualificacao] = useState<Record<string, unknown>>({});
+  const [testeInput, setTesteInput] = useState('');
+  const [testeCarregando, setTesteCarregando] = useState(false);
+  const [testeErro, setTesteErro] = useState('');
 
   useEffect(() => { carregar(); }, []);
 
@@ -105,44 +121,21 @@ export default function BaseConhecimentoPage() {
         setAlterado(true);
 
       } else if (ext === 'pdf') {
-        // Usa API do Claude para extrair texto do PDF
-        const reader = new FileReader();
-        reader.onload = async () => {
-          const base64 = (reader.result as string).split(',')[1];
+        // Extração via Gemini (mesma IA já usada no resto do app)
+        const fd = new FormData();
+        fd.append('file', file);
+        const resp = await fetch('/api/base-conhecimento/extrair-pdf', { method: 'POST', body: fd });
+        const data = await resp.json();
 
-          const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: 'claude-sonnet-4-6',
-              max_tokens: 4000,
-              messages: [{
-                role: 'user',
-                content: [
-                  {
-                    type: 'document',
-                    source: { type: 'base64', media_type: 'application/pdf', data: base64 }
-                  },
-                  {
-                    type: 'text',
-                    text: 'Extraia todo o texto deste documento em formato markdown limpo, preservando a estrutura de títulos e parágrafos. Retorne APENAS o texto extraído, sem comentários.'
-                  }
-                ]
-              }]
-            })
-          });
-
-          const data = await response.json();
-          const texto = data.content?.[0]?.text ?? '';
+        if (!resp.ok) {
+          setUploadErro(data?.error ?? 'Erro ao extrair texto do PDF.');
+        } else {
           const separador = conteudo.trim()
             ? `\n\n---\n# 📄 Importado de: ${file.name}\n\n`
             : `# 📄 Importado de: ${file.name}\n\n`;
-          setConteudo(prev => prev + separador + texto);
+          setConteudo(prev => prev + separador + data.texto);
           setAlterado(true);
-          setUploading(false);
-        };
-        reader.readAsDataURL(file);
-        return;
+        }
 
       } else {
         setUploadErro('Formato não suportado. Use PDF, TXT ou MD.');
@@ -153,6 +146,51 @@ export default function BaseConhecimentoPage() {
 
     setUploading(false);
     if (fileRef.current) fileRef.current.value = '';
+  }
+
+  async function enviarTeste() {
+    const texto = testeInput.trim();
+    if (!texto || testeCarregando) return;
+
+    const novoHistorico = [...testeHistorico, { role: 'user' as const, content: texto }];
+    setTesteHistorico(novoHistorico);
+    setTesteInput('');
+    setTesteCarregando(true);
+    setTesteErro('');
+
+    try {
+      const resp = await fetch('/api/base-conhecimento/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kb: conteudo,
+          historico: novoHistorico.map(m => ({ role: m.role, content: m.content })),
+          qualificacao_atual: testeQualificacao,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data?.error ?? 'Erro na simulação.');
+
+      setTesteQualificacao(prev => ({ ...prev, ...data.dados_extraidos }));
+      setTesteHistorico(h => [...h, {
+        role: 'assistant',
+        content: data.mensagem_para_cliente || '(sem mensagem — a IA classificou como spam/opt-out/outro consultor)',
+        intencao: data.intencao_cliente,
+        score: data.score,
+        handoff: data.acionar_handoff,
+      }]);
+    } catch (e: unknown) {
+      setTesteErro(e instanceof Error ? e.message : 'Erro desconhecido');
+    } finally {
+      setTesteCarregando(false);
+    }
+  }
+
+  function limparTeste() {
+    setTesteHistorico([]);
+    setTesteQualificacao({});
+    setTesteErro('');
+    setTesteInput('');
   }
 
   const chars = conteudo.length;
@@ -178,6 +216,16 @@ export default function BaseConhecimentoPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* Botão testar */}
+          <button
+            onClick={() => setTesteAberto(true)}
+            className="flex items-center gap-2 bg-violet-100 hover:bg-violet-200 text-violet-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            title="Simular uma conversa com esta KB antes de publicar"
+          >
+            <MessageSquare size={15} />
+            Testar com IA
+          </button>
+
           {/* Botão upload */}
           <label className="flex items-center gap-2 bg-muted hover:bg-muted text-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
             <Upload size={15} />
@@ -212,7 +260,7 @@ export default function BaseConhecimentoPage() {
       {/* Alertas */}
       {alterado && (
         <div className="px-8 py-2 bg-yellow-50 border-b border-yellow-200 text-yellow-700 text-xs">
-          ⚠ Alterações não salvas — clique em "Salvar nova versão" para publicar.
+          ⚠ Alterações não salvas — clique em &quot;Salvar nova versão&quot; para publicar.
         </div>
       )}
       {uploadErro && (
@@ -299,6 +347,109 @@ export default function BaseConhecimentoPage() {
           </div>
         </div>
       </div>
+
+      {testeAberto && (
+        <div className="fixed inset-0 bg-black/40 z-[90] flex justify-end" onClick={() => setTesteAberto(false)}>
+          <div
+            className="w-full max-w-md h-full bg-card border-l border-border flex flex-col shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="px-5 py-4 border-b border-border flex items-start justify-between">
+              <div>
+                <h3 className="text-foreground font-semibold flex items-center gap-2">
+                  <Bot size={17} className="text-violet-600" /> Simulação — Maikon IA
+                </h3>
+                <p className="text-muted-foreground text-xs mt-0.5">
+                  Usa o texto atual do editor, mesmo sem salvar. Não afeta leads reais.
+                </p>
+              </div>
+              <button onClick={() => setTesteAberto(false)} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {testeHistorico.length === 0 && (
+                <p className="text-muted-foreground text-xs text-center mt-8">
+                  Manda uma mensagem como se fosse um lead pra ver como o Maikon responderia com esta KB.
+                </p>
+              )}
+              {testeHistorico.map((m, i) => (
+                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm ${
+                    m.role === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-br-sm'
+                      : 'bg-muted text-foreground rounded-bl-sm'
+                  }`}>
+                    <p className="whitespace-pre-wrap">{m.content}</p>
+                    {m.role === 'assistant' && (m.intencao || m.score !== undefined) && (
+                      <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-border/50 flex-wrap">
+                        {m.intencao && (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${
+                            m.intencao === 'QUALIFICACAO'
+                              ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                              : 'bg-muted text-muted-foreground border-border'
+                          }`}>
+                            {m.intencao}
+                          </span>
+                        )}
+                        {m.score !== undefined && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                            score {m.score}
+                          </span>
+                        )}
+                        {m.handoff && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-yellow-500/10 text-yellow-700 border border-yellow-500/20 flex items-center gap-1">
+                            <Flame size={9} /> handoff
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {testeCarregando && (
+                <div className="flex justify-start">
+                  <div className="bg-muted text-muted-foreground rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm">
+                    digitando...
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {testeErro && (
+              <div className="px-4 py-2 bg-red-50 border-t border-red-200 text-red-600 text-xs">{testeErro}</div>
+            )}
+
+            <div className="p-3 border-t border-border flex items-center gap-2">
+              <button
+                onClick={limparTeste}
+                disabled={testeHistorico.length === 0}
+                className="p-2 text-muted-foreground hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Limpar conversa"
+              >
+                <Trash2 size={16} />
+              </button>
+              <input
+                type="text"
+                value={testeInput}
+                onChange={e => setTesteInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarTeste(); } }}
+                placeholder="Simula uma mensagem do lead..."
+                disabled={testeCarregando}
+                className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary disabled:opacity-60"
+              />
+              <button
+                onClick={enviarTeste}
+                disabled={testeCarregando || !testeInput.trim()}
+                className="p-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground rounded-lg transition-colors"
+              >
+                <Send size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {confirmDialog}
     </div>
