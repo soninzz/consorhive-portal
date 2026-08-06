@@ -156,7 +156,8 @@
     radial-gradient(circle at 60% 100%, rgba(var(--glow-teal), 0.08), transparent 45%);
 }
 
-.bg-honeycomb {
+.bg-honeycomb,
+.bg-honeycomb-dark {
   /* pseudo-elemento em vez de mask-image direto: mask-image mascara o
      elemento INTEIRO (filhos inclusos), não só o background — isso
      apagava os cards conforme desciam na tela. */
@@ -176,6 +177,20 @@
     linear-gradient(0deg, rgba(30, 25, 15, 0.05) 1px, transparent 1px);
   background-size: var(--hc-size) calc(var(--hc-size) * 1.732);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 90%);
+}
+
+.bg-honeycomb-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  --hc-size: 46px;
+  background-image:
+    linear-gradient(120deg, rgba(255, 235, 200, 0.06) 1px, transparent 1px),
+    linear-gradient(240deg, rgba(255, 235, 200, 0.06) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 235, 200, 0.06) 1px, transparent 1px);
+  background-size: var(--hc-size) calc(var(--hc-size) * 1.732);
+  mask-image: linear-gradient(180deg, black, transparent 92%);
 }
 
 .bg-dot-grid {
@@ -233,4 +248,62 @@
 
 .animate-drift {
   animation: drift 14s ease-in-out infinite;
+}
+
+/* ── Motivo hexagonal — unidade estrutural da marca (colmeia). Usado em
+   containers de ícone/avatar (.hex-icon), badges de status (.hex-badge),
+   corte de canto em cards (.card-hex-cut) e células de stepper
+   (.hex-cell). Nunca abelha literal — só geometria. ───────────────────── */
+
+.hex-icon {
+  clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0% 50%);
+}
+
+.hex-badge {
+  clip-path: polygon(9% 0%, 91% 0%, 100% 50%, 91% 100%, 9% 100%, 0% 50%);
+}
+
+.hex-cell {
+  clip-path: polygon(25% 2%, 75% 2%, 100% 50%, 75% 98%, 25% 98%, 0% 50%);
+}
+
+.card-hex-cut {
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+}
+
+.card-hex-cut-sm {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+
+.card-hex-cut-tr {
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+}
+
+/* Ponta em L nos dois cantos livres do corte hexagonal — reforça a silhueta
+   "faceada" mesmo em fundos sem contraste suficiente pro clip sozinho se notar. */
+.card-hex-frame {
+  position: relative;
+}
+
+.card-hex-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  clip-path: polygon(
+    0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px),
+    0 calc(100% - 22px - 1px), 1px calc(100% - 22px - 1px), 1px 1px, calc(100% - 22px - 1px) 1px,
+    calc(100% - 22px - 1px) 0
+  );
+  background: linear-gradient(135deg, rgba(var(--glow-gold), 0.55), transparent 40%);
+  opacity: 0.5;
+}
+
+@keyframes hex-fill-pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.55; }
+}
+
+.hex-cell-active {
+  animation: hex-fill-pulse 2.2s ease-in-out infinite;
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase, type Lista, type Template } from '@/lib/supabase';
 import { interpolarTemplate, primeiroNome, contarCombinacoesSpintax, gerarMensagemUnica } from '@/lib/utils';
+import { HexStepper } from '@/components/ui/hex-stepper';
 import { ChevronRight, Zap, Clock, AlertCircle } from 'lucide-react';
 
 function NovaCampanhaForm() {
@@ -162,21 +163,14 @@ function NovaCampanhaForm() {
         <p className="text-muted-foreground text-sm mt-1">Configure e dispare uma prospecção como Maikon.</p>
       </div>
 
-      <div className="flex items-center gap-2 mb-8">
-        {[1, 2, 3].map((p) => (
-          <div key={p} className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-              passo === p ? 'bg-primary text-primary-foreground' :
-              passo > p ? 'bg-emerald-100 text-emerald-700' :
-              'bg-muted text-muted-foreground'
-            }`}>{p}</div>
-            {p < 3 && <div className={`h-px w-8 ${passo > p ? 'bg-emerald-700' : 'bg-muted'}`} />}
-          </div>
-        ))}
-        <span className="ml-2 text-sm text-muted-foreground">
-          {passo === 1 ? 'Lista e nome' : passo === 2 ? 'Mensagem' : 'Confirmar'}
-        </span>
-      </div>
+      <HexStepper
+        current={passo}
+        steps={[
+          { label: 'Lista e nome' },
+          { label: 'Mensagem' },
+          { label: 'Confirmar' },
+        ]}
+      />
 
       {passo === 1 && (
         <div className="space-y-5">
@@ -242,10 +236,10 @@ function NovaCampanhaForm() {
             <div className="space-y-3">
               {templates.map(t => (
                 <label key={t.id} className={`block cursor-pointer rounded-xl border p-4 transition-colors ${
-                  templateId === t.id ? 'border-emerald-500 bg-emerald-50' : 'border-border bg-card hover:border-border'
+                  templateId === t.id ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-border'
                 }`}>
                   <div className="flex items-start gap-3">
-                    <input type="radio" name="template" value={t.id} checked={templateId === t.id} onChange={e => setTemplateId(e.target.value)} className="mt-1 accent-emerald-500" />
+                    <input type="radio" name="template" value={t.id} checked={templateId === t.id} onChange={e => setTemplateId(e.target.value)} className="mt-1 accent-primary" />
                     <div className="flex-1 min-w-0">
                       <p className="text-foreground font-medium text-sm">{t.nome}</p>
                       <p className="text-muted-foreground text-xs mt-1 line-clamp-3 whitespace-pre-wrap">{t.corpo}</p>
@@ -262,8 +256,8 @@ function NovaCampanhaForm() {
                 Preview com contatos reais — repare que o texto varia mesmo entre contatos, isso é proposital (evita mensagem repetida)
               </p>
               {previewNomes.slice(0, 3).map((nome, i) => (
-                <div key={i} className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                  <p className="text-xs text-emerald-600 mb-1">Para: {nome}</p>
+                <div key={i} className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+                  <p className="text-xs text-primary mb-1">Para: {nome}</p>
                   <p className="text-foreground text-sm whitespace-pre-wrap">
                     {interpolarTemplate(templateSelecionado?.corpo ?? '', { nome: primeiroNome(nome) ?? 'você' })}
                   </p>
@@ -303,7 +297,7 @@ function NovaCampanhaForm() {
 
       {passo === 3 && (
         <div className="space-y-5">
-          <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+          <div className="card-hex-cut bg-card border border-border p-5 space-y-4">
             <h3 className="text-foreground font-semibold">Resumo da campanha</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -325,7 +319,7 @@ function NovaCampanhaForm() {
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-5 space-y-3">
+          <div className="card-hex-cut bg-card border border-border p-5 space-y-3">
             <h3 className="text-foreground font-semibold text-sm">Quantos disparar agora?</h3>
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">

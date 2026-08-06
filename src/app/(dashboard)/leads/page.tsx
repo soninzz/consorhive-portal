@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase, type Lead } from '@/lib/supabase';
 import { bgTemperatura, formatarData } from '@/lib/utils';
+import { HexBadge, HexIcon } from '@/components/ui/hex';
 import { Users, Search, MessageSquare, UserCheck, BotOff } from 'lucide-react';
 
 export default function LeadsPage() {
@@ -107,12 +108,14 @@ export default function LeadsPage() {
         <div className="text-muted-foreground text-sm">Carregando leads...</div>
       ) : filtrados.length === 0 ? (
         <div className="border border-dashed border-border rounded-xl p-16 text-center">
-          <Users size={40} className="mx-auto text-muted-foreground mb-4" />
+          <HexIcon size="lg" className="mx-auto mb-4">
+            <Users size={20} className="text-muted-foreground" />
+          </HexIcon>
           <p className="text-muted-foreground font-medium">Nenhum lead ainda</p>
           <p className="text-muted-foreground text-sm mt-1">Quando uma campanha iniciar uma campanha, os leads aparecerão aqui.</p>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="bg-honeycomb card-hex-cut bg-card border border-border overflow-hidden">
           <div className="px-6 py-3 border-b border-border text-xs text-muted-foreground">
             {filtrados.length} lead{filtrados.length !== 1 ? 's' : ''} encontrado{filtrados.length !== 1 ? 's' : ''}
           </div>
@@ -136,9 +139,9 @@ export default function LeadsPage() {
                     <p className="text-muted-foreground text-xs mt-0.5">{lead.lead_id}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`text-xs px-2 py-1 rounded-full border capitalize ${bgTemperatura(lead.temperatura)}`}>
+                    <HexBadge className={`border ${bgTemperatura(lead.temperatura)}`}>
                       {lead.temperatura}
-                    </span>
+                    </HexBadge>
                   </td>
                   <td className="px-6 py-4 text-muted-foreground text-xs">
                     {labelEtapa[lead.etapa_funil] ?? lead.etapa_funil}
@@ -150,13 +153,13 @@ export default function LeadsPage() {
                     {lead.ultima_interacao ? formatarData(lead.ultima_interacao) : '—'}
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    <HexBadge className={
                       lead.status_bot === 'ativo'
                         ? 'bg-emerald-500/10 text-emerald-600'
                         : 'bg-muted text-muted-foreground'
-                    }`}>
+                    }>
                       {lead.status_bot === 'ativo' ? 'Ativa' : 'Pausada'}
-                    </span>
+                    </HexBadge>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 justify-end">

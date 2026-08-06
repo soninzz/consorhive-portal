@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { supabase, type Campanha } from '@/lib/supabase';
 import { primeiroNome, gerarMensagemUnica } from '@/lib/utils';
 import { corStatus, formatarData } from '@/lib/utils';
-import { Zap, Plus, Pause, RotateCcw, XCircle, BarChart2, ChevronRight, AlertCircle, Trash2 } from 'lucide-react';
+import { HexBadge, HexIcon } from '@/components/ui/hex';
+import { Zap, Plus, Pause, RotateCcw, XCircle, ChevronRight, AlertCircle, Trash2 } from 'lucide-react';
 import { useConfirm } from '@/hooks/use-confirm';
 
 type CampanhaComFila = Campanha & { restantes: number; naFila: number };
@@ -191,24 +192,26 @@ export default function CampanhasPage() {
         <div className="text-muted-foreground text-sm">Carregando campanhas...</div>
       ) : campanhas.length === 0 ? (
         <div className="border border-dashed border-border rounded-xl p-16 text-center">
-          <Zap size={40} className="mx-auto text-muted-foreground mb-4" />
+          <HexIcon size="lg" className="mx-auto mb-4">
+            <Zap size={20} className="text-muted-foreground" />
+          </HexIcon>
           <p className="text-muted-foreground font-medium">Nenhuma campanha ainda</p>
           <p className="text-muted-foreground text-sm mt-1">Crie uma campanha pra começar a prospectar.</p>
-          <Link href="/campanhas/nova" className="mt-4 inline-block text-emerald-600 text-sm hover:text-emerald-700">
+          <Link href="/campanhas/nova" className="mt-4 inline-block text-primary text-sm hover:text-primary/80">
             Criar campanha →
           </Link>
         </div>
       ) : (
         <div className="space-y-3">
           {campanhas.map((c) => (
-            <div key={c.id} className="bg-card border border-border rounded-xl p-5 hover:border-border transition-colors">
+            <div key={c.id} className="card-hex-cut-sm bg-card border border-border p-5 transition-colors hover:border-primary/30">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
                     <h3 className="text-foreground font-semibold truncate">{c.nome}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full border ${corStatus(c.status)}`}>
+                    <HexBadge className={`border ${corStatus(c.status)}`}>
                       {labelStatus[c.status] ?? c.status}
-                    </span>
+                    </HexBadge>
                   </div>
                   <p className="text-muted-foreground text-xs">
                     Lista: <span className="text-muted-foreground">{c.lista_nome ?? '—'}</span>
@@ -281,7 +284,7 @@ export default function CampanhasPage() {
         const qtdValida = continuarQtd.trim() !== '' && qtd > 0 && qtd <= c.restantes;
         return (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-card border border-border rounded-2xl w-full max-w-sm p-6 space-y-4">
+            <div className="card-hex-cut bg-card border border-border w-full max-w-sm p-6 space-y-4">
               <div>
                 <h3 className="text-foreground font-semibold">Continuar disparo</h3>
                 <p className="text-muted-foreground text-sm mt-1">

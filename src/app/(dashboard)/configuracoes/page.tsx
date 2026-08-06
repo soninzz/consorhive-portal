@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { contarCombinacoesSpintax } from '@/lib/utils';
+import { HexBadge, HexDot, HexIcon } from '@/components/ui/hex';
 import { Settings, Save, CheckCircle, Plus, Trash2, Eye, EyeOff, AlertTriangle, Sparkles, Pencil, X } from 'lucide-react';
 import { useConfirm } from '@/hooks/use-confirm';
 
@@ -147,7 +148,9 @@ export default function ConfiguracoesPage() {
     <div className="flex-1 p-8 space-y-8 overflow-y-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Settings size={20} className="text-emerald-600" />
+          <HexIcon>
+            <Settings size={16} className="text-primary" />
+          </HexIcon>
           <h2 className="text-2xl font-bold text-foreground">Configurações</h2>
         </div>
         {salvo && (
@@ -158,7 +161,7 @@ export default function ConfiguracoesPage() {
       </div>
 
       {/* Seção Evolution */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <div className="card-hex-cut bg-card border border-border p-6">
         <h3 className="text-foreground font-semibold mb-4">Integração WhatsApp (Evolution)</h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -186,13 +189,13 @@ export default function ConfiguracoesPage() {
           </div>
         </div>
         <div className="mt-4 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+          <HexDot pulse className="bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.7)]" />
           <span className="text-xs text-muted-foreground">Conectado — TechXap - ConsorHive</span>
         </div>
       </div>
 
       {/* Seção Agente */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <div className="card-hex-cut bg-card border border-border p-6">
         <h3 className="text-foreground font-semibold mb-4">Agente (Maikon)</h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -216,7 +219,7 @@ export default function ConfiguracoesPage() {
           <div>
             <label className="block text-xs text-muted-foreground mb-1">Status do Agente</label>
             <div className="flex items-center gap-2 bg-muted border border-border rounded-lg px-3 py-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+              <HexDot pulse className="bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.7)]" />
               <span className="text-foreground text-sm">Online</span>
             </div>
           </div>
@@ -224,7 +227,7 @@ export default function ConfiguracoesPage() {
       </div>
 
       {/* Seção Templates */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <div className="card-hex-cut bg-card border border-border p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-foreground font-semibold">Templates de Mensagem</h3>
@@ -306,7 +309,7 @@ export default function ConfiguracoesPage() {
               <button
                 onClick={gerarParaNovo}
                 disabled={gerandoNovo || !novoCorpo.trim()}
-                className="flex items-center gap-2 bg-violet-100 hover:bg-violet-200 disabled:opacity-40 disabled:cursor-not-allowed text-violet-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="flex items-center gap-2 bg-secondary/15 hover:bg-secondary/25 disabled:opacity-40 disabled:cursor-not-allowed text-secondary px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 title="Reescreve a mensagem com blocos de variação usando IA"
               >
                 <Sparkles size={14} />
@@ -336,20 +339,20 @@ export default function ConfiguracoesPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <p className="text-foreground font-medium text-sm">{t.nome}</p>
-                          {!t.ativo && <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">Inativo</span>}
+                          {!t.ativo && <HexBadge className="bg-muted text-muted-foreground">Inativo</HexBadge>}
                           {t.taxa_resposta && (
-                            <span className="text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded">
+                            <HexBadge className="bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
                               {t.taxa_resposta}% resposta
-                            </span>
+                            </HexBadge>
                           )}
                           {combinacoesAtuais <= 1 ? (
-                            <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-1.5 py-0.5 rounded flex items-center gap-1">
+                            <HexBadge className="bg-yellow-500/10 text-yellow-700 border border-yellow-500/20">
                               <AlertTriangle size={11} /> sem variação
-                            </span>
+                            </HexBadge>
                           ) : (
-                            <span className="text-xs bg-violet-100 text-violet-700 border border-violet-200 px-1.5 py-0.5 rounded">
+                            <HexBadge className="bg-secondary/10 text-secondary border border-secondary/20">
                               ≈{combinacoesAtuais.toLocaleString('pt-BR')} variações
-                            </span>
+                            </HexBadge>
                           )}
                         </div>
                         <p className="text-muted-foreground text-xs whitespace-pre-wrap line-clamp-3">{t.corpo}</p>
@@ -418,7 +421,7 @@ export default function ConfiguracoesPage() {
                         <button
                           onClick={gerarParaEdicao}
                           disabled={gerandoEdicao || !edicaoCorpo.trim()}
-                          className="flex items-center gap-2 bg-violet-100 hover:bg-violet-200 disabled:opacity-40 disabled:cursor-not-allowed text-violet-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                          className="flex items-center gap-2 bg-secondary/15 hover:bg-secondary/25 disabled:opacity-40 disabled:cursor-not-allowed text-secondary px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                           title="Reescreve a mensagem com blocos de variação usando IA"
                         >
                           <Sparkles size={14} />

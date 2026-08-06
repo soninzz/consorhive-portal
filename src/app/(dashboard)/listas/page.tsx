@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase, type Lista } from '@/lib/supabase';
 import { normalizarTelefone, extrairDDD, formatarData } from '@/lib/utils';
+import { HexBadge, HexIcon } from '@/components/ui/hex';
 import { Upload, List, Trash2, ArrowRight, Users, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { useConfirm } from '@/hooks/use-confirm';
 
@@ -166,18 +167,20 @@ export default function ListasPage() {
         <div className="text-muted-foreground text-sm">Carregando listas...</div>
       ) : listas.length === 0 ? (
         <div className="border border-dashed border-border rounded-xl p-16 text-center">
-          <List size={40} className="mx-auto text-muted-foreground mb-4" />
+          <HexIcon size="lg" className="mx-auto mb-4">
+            <List size={20} className="text-muted-foreground" />
+          </HexIcon>
           <p className="text-muted-foreground font-medium">Nenhuma lista ainda</p>
           <p className="text-muted-foreground text-sm mt-1">Importe um arquivo Excel ou CSV para começar.</p>
           <button
             onClick={() => setModalAberto(true)}
-            className="mt-4 text-emerald-600 text-sm hover:text-emerald-700"
+            className="mt-4 text-primary text-sm hover:text-primary/80"
           >
             Importar agora →
           </button>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="bg-honeycomb card-hex-cut bg-card border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
@@ -194,7 +197,7 @@ export default function ListasPage() {
                 <tr key={lista.id} className="border-b border-border/60 hover:bg-muted/50 transition-colors">
                   <td className="px-6 py-4 text-foreground font-medium">{lista.nome}</td>
                   <td className="px-6 py-4">
-                    <span className="bg-muted text-muted-foreground text-xs px-2 py-1 rounded capitalize">{lista.origem}</span>
+                    <HexBadge className="bg-muted text-muted-foreground">{lista.origem}</HexBadge>
                   </td>
                   <td className="px-6 py-4 text-right text-foreground">
                     <span className="flex items-center justify-end gap-1">
@@ -214,7 +217,7 @@ export default function ListasPage() {
                     <div className="flex items-center justify-end gap-2">
                       <a
                         href={`/campanhas/nova?lista=${lista.id}`}
-                        className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 transition-colors"
+                        className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
                       >
                         Usar em campanha <ArrowRight size={12} />
                       </a>
@@ -261,9 +264,11 @@ export default function ListasPage() {
                 {!arquivo ? (
                   <div
                     onClick={() => fileRef.current?.click()}
-                    className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-emerald-600 transition-colors"
+                    className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary transition-colors"
                   >
-                    <Upload size={24} className="mx-auto text-muted-foreground mb-2" />
+                    <HexIcon size="default" className="mx-auto mb-2">
+                      <Upload size={16} className="text-muted-foreground" />
+                    </HexIcon>
                     <p className="text-muted-foreground text-sm">Clique para selecionar o arquivo</p>
                     <p className="text-muted-foreground text-xs mt-1">.xlsx ou .csv</p>
                     <input

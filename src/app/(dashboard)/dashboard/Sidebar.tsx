@@ -18,11 +18,11 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="relative z-10 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-sidebar/85 p-4 backdrop-blur-xl md:flex">
-      <div className="mb-8 flex items-center gap-2 p-2">
-        <span className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary">
-          <span className="absolute inset-0 animate-pulse-glow rounded-lg bg-primary/40 blur-md" />
-          <span className="relative h-2.5 w-2.5 rounded-[3px] bg-background" />
+    <aside className="bg-honeycomb-dark dark relative z-10 hidden h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar/95 p-4 backdrop-blur-xl md:flex">
+      <div className="mb-8 flex items-center gap-2.5 p-2">
+        <span className="hex-icon relative flex h-9 w-9 items-center justify-center bg-gradient-to-br from-primary to-primary/40">
+          <span className="absolute inset-0 animate-pulse-glow bg-primary/40 blur-md" />
+          <span className="hex-icon relative h-3.5 w-3.5 scale-[0.6] bg-background" />
         </span>
         <h1 className="text-xl font-bold tracking-tight text-gradient-gold">ConsorHive</h1>
       </div>
@@ -41,20 +41,20 @@ export function Sidebar() {
                 href={item.path}
                 className={`group relative flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-all ${
                   active
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
                 }`}
               >
                 {active && (
                   <motion.span
                     layoutId="sidebar-active"
-                    className="absolute inset-y-1 left-0 w-[3px] rounded-full bg-primary shadow-[0_0_10px_rgba(205,165,60,0.6)]"
+                    className="hex-cell absolute left-0 top-1/2 h-4 w-2 -translate-y-1/2 bg-primary shadow-[0_0_10px_rgba(var(--glow-gold),0.6)]"
                     transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                   />
                 )}
                 <item.icon
                   size={18}
-                  className={active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}
+                  className={active ? 'text-primary' : 'text-sidebar-foreground/70 group-hover:text-sidebar-foreground'}
                 />
                 <span>{item.name}</span>
               </Link>
@@ -63,7 +63,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-auto rounded-xl border border-border bg-muted/60 p-3 text-xs text-muted-foreground">
+      <div className="mt-auto rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3 text-xs text-sidebar-foreground/70">
         Agentes de IA integrados ao WhatsApp da sua operação.
       </div>
     </aside>

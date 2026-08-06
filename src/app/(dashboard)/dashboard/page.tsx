@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HexIcon } from "@/components/ui/hex";
 import { Users, MessageSquareText, PhoneForwarded, Activity, RefreshCw } from "lucide-react";
 import { supabase } from '@/lib/supabase';
 
@@ -99,40 +100,36 @@ export default function DashboardPage() {
     return `Há ${Math.floor(diff / 86400)}d`;
   }
 
-  const kpis = [
+  const primaryKpi = {
+    label: 'Aguardando Consultor',
+    value: loading ? '...' : stats.aguardandoConsultor,
+    hint: 'Leads aquecidos prontos pra contato humano agora',
+    icon: PhoneForwarded,
+  };
+
+  const secondaryKpis = [
     {
       label: 'Leads em Prospecção',
       value: loading ? '...' : stats.totalLeads.toLocaleString('pt-BR'),
       hint: 'Total de leads no sistema',
       icon: Users,
-      accent: 'text-primary',
     },
     {
-      label: 'Conversas Ativas (Automático)',
+      label: 'Conversas Ativas',
       value: loading ? '...' : stats.conversasAtivas,
-      hint: 'Bot ativo respondendo',
+      hint: 'Bot ativo respondendo agora',
       icon: MessageSquareText,
-      accent: 'text-secondary',
-    },
-    {
-      label: 'Aguardando Consultor',
-      value: loading ? '...' : stats.aguardandoConsultor,
-      hint: 'Leads aquecidos aguardando contato',
-      icon: PhoneForwarded,
-      accent: 'text-emerald-600',
-      valueClass: 'text-emerald-600',
     },
     {
       label: 'Taxa de Engajamento',
       value: loading ? '...' : `${stats.taxaResposta}%`,
       hint: 'Leads que avançaram na qualificação',
       icon: Activity,
-      accent: 'text-primary',
     },
   ];
 
   return (
-    <div className="relative flex-1 space-y-6 bg-honeycomb p-8 pt-6">
+    <div className="bg-honeycomb relative flex-1 space-y-6 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
         <div className="flex items-center gap-3">
@@ -147,48 +144,72 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi, i) => (
-          <motion.div
-            key={kpi.label}
-            custom={i}
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-          >
-            <Card className="glass-panel group/kpi relative overflow-hidden border-none transition-transform hover:-translate-y-0.5">
-              <div className="glow-blob glow-blob-gold absolute -right-6 -top-6 h-24 w-24 opacity-0 transition-opacity duration-300 group-hover/kpi:opacity-100" />
-              <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.label}</CardTitle>
-                <kpi.icon className={`h-4 w-4 ${kpi.accent}`} />
-              </CardHeader>
-              <CardContent className="relative">
-                <div className={`text-2xl font-bold ${kpi.valueClass ?? 'text-foreground'}`}>
-                  {kpi.value}
-                </div>
-                <p className="text-xs text-muted-foreground">{kpi.hint}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* KPI principal — a métrica acionável do momento, tratamento de destaque */}
+        <motion.div custom={0} initial="hidden" animate="show" variants={fadeUp} className="lg:col-span-1">
+          <Card className="card-hex-cut card-hex-frame relative h-full overflow-hidden border-none bg-gradient-to-br from-primary/15 via-card to-card p-1 ring-1 ring-primary/25">
+            <div className="glow-blob glow-blob-gold animate-pulse-glow absolute -right-8 -top-8 h-32 w-32 opacity-70" />
+            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-sm font-medium text-foreground/80">{primaryKpi.label}</CardTitle>
+              <HexIcon size="lg" className="from-primary/50 to-primary/10">
+                <primaryKpi.icon className="h-5 w-5 text-primary" />
+              </HexIcon>
+            </CardHeader>
+            <CardContent className="relative">
+              <div className="text-4xl font-bold text-primary">{primaryKpi.value}</div>
+              <p className="mt-1 text-xs text-muted-foreground">{primaryKpi.hint}</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* KPIs secundários — mesma família visual, peso menor */}
+        <div className="grid gap-4 sm:grid-cols-3 lg:col-span-2">
+          {secondaryKpis.map((kpi, i) => (
+            <motion.div key={kpi.label} custom={i + 1} initial="hidden" animate="show" variants={fadeUp}>
+              <Card className="card-hex-cut-sm group/kpi relative h-full overflow-hidden border-none bg-card/80 ring-1 ring-border/60 transition-colors hover:ring-primary/30">
+                <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-1">
+                  <CardTitle className="text-xs font-medium text-muted-foreground">{kpi.label}</CardTitle>
+                  <HexIcon size="sm">
+                    <kpi.icon className="h-3.5 w-3.5 text-primary" />
+                  </HexIcon>
+                </CardHeader>
+                <CardContent className="relative">
+                  <div className="text-xl font-bold text-foreground">{kpi.value}</div>
+                  <p className="text-xs text-muted-foreground">{kpi.hint}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <motion.div custom={4} initial="hidden" animate="show" variants={fadeUp} className="lg:col-span-4">
-          <Card className="glass-panel border-none">
+          <Card className="card-hex-cut glass-panel border-none">
             <CardHeader>
               <CardTitle className="text-foreground">Performance de Disparos</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex h-[250px] w-full items-center justify-center rounded-md border border-dashed border-border bg-muted/40 text-sm text-muted-foreground">
-                Gráfico disponível após primeira campanha disparada
+              <div className="relative flex h-[250px] w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-md border border-border/70 bg-muted/30">
+                <div className="flex items-end gap-1.5">
+                  {[0, 1, 2, 3, 2, 1, 0].map((delay, i) => (
+                    <span
+                      key={i}
+                      className="hex-cell animate-pulse-glow h-6 w-6 bg-primary/25"
+                      style={{ animationDelay: `${delay * 0.35}s` }}
+                    />
+                  ))}
+                </div>
+                <p className="max-w-[220px] text-center text-sm text-muted-foreground">
+                  Seu enxame está pronto — o gráfico aparece assim que a primeira campanha for disparada
+                </p>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
         <motion.div custom={5} initial="hidden" animate="show" variants={fadeUp} className="lg:col-span-3">
-          <Card className="glass-panel h-full border-none">
+          <Card className="card-hex-cut glass-panel h-full border-none">
             <CardHeader>
               <CardTitle className="text-foreground">Últimos Handoffs</CardTitle>
             </CardHeader>
@@ -201,7 +222,7 @@ export default function DashboardPage() {
                 <div className="space-y-5">
                   {handoffs.map((h) => (
                     <div key={h.lead_id} className="flex items-center">
-                      <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                      <span className="hex-cell hex-cell-active h-3 w-3 shrink-0 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
                       <div className="ml-3 space-y-1">
                         <p className="text-sm font-medium text-foreground">{h.nome}</p>
                         <p className="text-xs text-muted-foreground">Aguardando consultor</p>

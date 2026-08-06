@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { HexBadge, HexIcon } from '@/components/ui/hex';
 import { MessageSquare, Search, User, Bot, RefreshCw, UserCheck } from 'lucide-react';
 
 type Lead = {
@@ -142,43 +143,57 @@ export default function ConversasPage() {
           ) : filtrados.length === 0 ? (
             <p className="text-muted-foreground text-xs p-4">Nenhuma conversa encontrada.</p>
           ) : (
-            filtrados.map(lead => (
-              <button
-                key={lead.lead_id}
-                onClick={() => setLeadSelecionado(lead)}
-                className={`w-full text-left p-4 border-b border-border/60 hover:bg-muted/50 transition-colors ${
-                  leadSelecionado?.lead_id === lead.lead_id ? 'bg-muted' : ''
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2 mb-1.5">
-                  <p className="text-foreground text-sm font-medium truncate">{lead.nome || lead.lead_id}</p>
-                  <span className="text-muted-foreground text-xs shrink-0">{tempoRelativo(lead.updated_at)}</span>
-                </div>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className={`text-xs px-1.5 py-0.5 rounded border capitalize ${corTemperatura(lead.temperatura)}`}>
-                    {lead.temperatura || 'frio'}
-                  </span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded ${
-                    lead.status_bot === 'ativo'
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-orange-100 text-orange-700'
-                  }`}>
-                    {lead.status_bot === 'ativo' ? 'Automático' : 'Humano'}
-                  </span>
-                  <span className="text-muted-foreground text-xs">score {lead.score ?? 0}</span>
-                  {lead.follow_up_em && (
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                      📅 {formatarDataCurta(lead.follow_up_em)}
-                    </span>
-                  )}
-                </div>
-                {lead.historico_conversa?.length > 0 && (
-                  <p className="text-muted-foreground text-xs mt-1.5 truncate">
-                    {lead.historico_conversa[lead.historico_conversa.length - 1]?.content?.slice(0, 55)}...
-                  </p>
-                )}
-              </button>
-            ))
+            filtrados.map(lead => {
+              const ehAutomatico = lead.status_bot === 'ativo';
+              return (
+                <button
+                  key={lead.lead_id}
+                  onClick={() => setLeadSelecionado(lead)}
+                  className={`relative w-full text-left p-4 pl-5 border-b border-border/60 hover:bg-muted/50 transition-colors ${
+                    leadSelecionado?.lead_id === lead.lead_id ? 'bg-muted' : ''
+                  }`}
+                >
+                  <span
+                    className={`absolute left-0 top-0 h-full w-[3px] ${ehAutomatico ? 'bg-primary/70' : 'bg-secondary'}`}
+                  />
+                  <div className="flex items-start gap-3">
+                    <HexIcon
+                      size="sm"
+                      className={ehAutomatico ? 'from-primary/40 to-primary/10' : 'from-secondary/50 to-secondary/10'}
+                    >
+                      {ehAutomatico
+                        ? <Bot size={13} className="text-primary" />
+                        : <User size={13} className="text-secondary" />}
+                    </HexIcon>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <p className="text-foreground text-sm font-medium truncate">{lead.nome || lead.lead_id}</p>
+                        <span className="text-muted-foreground text-xs shrink-0">{tempoRelativo(lead.updated_at)}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <HexBadge className={`border ${corTemperatura(lead.temperatura)}`}>
+                          {lead.temperatura || 'frio'}
+                        </HexBadge>
+                        <HexBadge className={ehAutomatico ? 'bg-primary/10 text-primary' : 'bg-secondary/15 text-secondary'}>
+                          {ehAutomatico ? 'Automático' : 'Humano'}
+                        </HexBadge>
+                        <span className="text-muted-foreground text-xs">score {lead.score ?? 0}</span>
+                        {lead.follow_up_em && (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                            📅 {formatarDataCurta(lead.follow_up_em)}
+                          </span>
+                        )}
+                      </div>
+                      {lead.historico_conversa?.length > 0 && (
+                        <p className="text-muted-foreground text-xs mt-1.5 truncate">
+                          {lead.historico_conversa[lead.historico_conversa.length - 1]?.content?.slice(0, 55)}...
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })
           )}
         </div>
       </div>
@@ -229,18 +244,19 @@ export default function ConversasPage() {
             ) : (
               leadSelecionado.historico_conversa.map((msg, i) => (
                 <div key={i} className={`flex gap-3 ${msg.role === 'assistant' ? '' : 'flex-row-reverse'}`}>
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-                    msg.role === 'assistant' ? 'bg-emerald-100' : 'bg-muted'
-                  }`}>
+                  <HexIcon
+                    size="sm"
+                    className={msg.role === 'assistant' ? 'from-primary/40 to-primary/10' : 'from-secondary/50 to-secondary/10'}
+                  >
                     {msg.role === 'assistant'
-                      ? <Bot size={14} className="text-emerald-600" />
-                      : <User size={14} className="text-muted-foreground" />
+                      ? <Bot size={13} className="text-primary" />
+                      : <User size={13} className="text-secondary" />
                     }
-                  </div>
+                  </HexIcon>
                   <div className={`max-w-[70%] rounded-xl px-4 py-2.5 text-sm ${
                     msg.role === 'assistant'
                       ? 'bg-muted text-foreground'
-                      : 'bg-emerald-50 border border-emerald-200 text-foreground'
+                      : 'bg-secondary/10 border border-secondary/25 text-foreground'
                   }`}>
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                   </div>
@@ -266,9 +282,11 @@ export default function ConversasPage() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="bg-honeycomb flex-1 flex items-center justify-center">
           <div className="text-center">
-            <MessageSquare size={40} className="text-muted-foreground mx-auto mb-3" />
+            <HexIcon size="lg" className="mx-auto mb-3">
+              <MessageSquare size={20} className="text-muted-foreground" />
+            </HexIcon>
             <p className="text-muted-foreground text-sm">Selecione uma conversa para visualizar</p>
           </div>
         </div>
