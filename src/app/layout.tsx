@@ -2,9 +2,10 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { ptBR } from "@clerk/localizations";
 import './globals.css'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, League_Spartan } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
+const leagueSpartan = League_Spartan({ subsets: ['latin'], variable: '--font-heading' })
 
 export const metadata: Metadata = {
   title: 'ConsorHive',
@@ -19,7 +20,7 @@ export default function RootLayout({
   return (
     <ClerkProvider localization={ptBR}>
       <html lang="pt-BR">
-        <body className={`${inter.className} bg-background text-foreground`}>
+        <body className={`${inter.variable} ${leagueSpartan.variable} font-sans bg-background text-foreground`}>
           {children}
         </body>
       </html>

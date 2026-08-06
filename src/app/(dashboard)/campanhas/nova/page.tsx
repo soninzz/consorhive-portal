@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase, type Lista, type Template } from '@/lib/supabase';
 import { interpolarTemplate, primeiroNome, contarCombinacoesSpintax, gerarMensagemUnica } from '@/lib/utils';
 import { HexStepper } from '@/components/ui/hex-stepper';
+import { Button } from '@/components/ui/button';
 import { ChevronRight, Zap, Clock, AlertCircle } from 'lucide-react';
 
 function NovaCampanhaForm() {
@@ -157,10 +158,11 @@ function NovaCampanhaForm() {
   const estimativaHoras = Math.ceil((quantidadeAlvo * 90) / 3600);
 
   return (
-    <div className="flex-1 p-8 max-w-2xl">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground">Nova Campanha</h2>
-        <p className="text-muted-foreground text-sm mt-1">Configure e dispare uma prospecção como Maikon.</p>
+    <div className="bg-honeycomb relative min-h-full flex-1 max-w-2xl space-y-8 p-8 pt-7">
+      <div className="border-b border-border pb-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Nova prospecção</p>
+        <h2 className="font-heading mt-1 text-2xl font-semibold tracking-tight text-foreground">Nova Campanha</h2>
+        <p className="text-muted-foreground text-sm mt-1.5">Configure e dispare uma prospecção como Maikon.</p>
       </div>
 
       <HexStepper
@@ -210,13 +212,9 @@ function NovaCampanhaForm() {
               </p>
             )}
           </div>
-          <button
-            onClick={() => setPasso(2)}
-            disabled={!podeProsseguir1}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
-          >
+          <Button onClick={() => setPasso(2)} disabled={!podeProsseguir1}>
             Próximo <ChevronRight size={16} />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -281,23 +279,19 @@ function NovaCampanhaForm() {
           })()}
 
           <div className="flex gap-3">
-            <button onClick={() => setPasso(1)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Button variant="ghost" onClick={() => setPasso(1)}>
               Voltar
-            </button>
-            <button
-              onClick={() => setPasso(3)}
-              disabled={!podeProsseguir2}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
-            >
+            </Button>
+            <Button onClick={() => setPasso(3)} disabled={!podeProsseguir2}>
               Próximo <ChevronRight size={16} />
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {passo === 3 && (
         <div className="space-y-5">
-          <div className="card-hex-cut bg-card border border-border p-5 space-y-4">
+          <div className="card-hex-cut border border-border bg-card p-5 space-y-4">
             <h3 className="text-foreground font-semibold">Resumo da campanha</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -319,7 +313,7 @@ function NovaCampanhaForm() {
             </div>
           </div>
 
-          <div className="card-hex-cut bg-card border border-border p-5 space-y-3">
+          <div className="card-hex-cut border border-border bg-card p-5 space-y-3">
             <h3 className="text-foreground font-semibold text-sm">Quantos disparar agora?</h3>
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
@@ -381,17 +375,13 @@ function NovaCampanhaForm() {
           )}
 
           <div className="flex gap-3">
-            <button onClick={() => setPasso(2)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Button variant="ghost" onClick={() => setPasso(2)}>
               Voltar
-            </button>
-            <button
-              onClick={disparar}
-              disabled={disparando || !quantidadeValida}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
-            >
+            </Button>
+            <Button size="lg" onClick={disparar} disabled={disparando || !quantidadeValida}>
               <Zap size={16} />
               {disparando ? 'Iniciando...' : 'Iniciar Campanha'}
-            </button>
+            </Button>
           </div>
         </div>
       )}

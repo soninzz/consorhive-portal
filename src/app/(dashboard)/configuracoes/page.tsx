@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { contarCombinacoesSpintax } from '@/lib/utils';
 import { HexBadge, HexDot, HexIcon } from '@/components/ui/hex';
+import { Button } from '@/components/ui/button';
 import { Settings, Save, CheckCircle, Plus, Trash2, Eye, EyeOff, AlertTriangle, Sparkles, Pencil, X } from 'lucide-react';
 import { useConfirm } from '@/hooks/use-confirm';
 
@@ -145,23 +146,27 @@ export default function ConfiguracoesPage() {
   const variaveis = ['{{nome}}', '{{empresa}}', '{{cidade}}'];
 
   return (
-    <div className="flex-1 p-8 space-y-8 overflow-y-auto">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <HexIcon>
-            <Settings size={16} className="text-primary" />
-          </HexIcon>
-          <h2 className="text-2xl font-bold text-foreground">Configurações</h2>
+    <div className="bg-honeycomb relative min-h-full flex-1 space-y-8 overflow-y-auto p-8 pt-7">
+      <div className="flex items-end justify-between border-b border-border pb-5">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Integrações e templates</p>
+          <h2 className="font-heading mt-1 flex items-center gap-2.5 text-2xl font-semibold tracking-tight text-foreground">
+            <HexIcon size="sm">
+              <Settings size={14} className="text-primary" />
+            </HexIcon>
+            Configurações
+          </h2>
         </div>
         {salvo && (
-          <div className="flex items-center gap-1.5 text-emerald-600 text-sm">
+          <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-emerald-700 text-sm">
             <CheckCircle size={14} /> {salvo}
           </div>
         )}
       </div>
 
       {/* Seção Evolution */}
-      <div className="card-hex-cut bg-card border border-border p-6">
+      <div className="card-hex-cut border border-border bg-card p-6">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/80 mb-1">Canal</p>
         <h3 className="text-foreground font-semibold mb-4">Integração WhatsApp (Evolution)</h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -182,20 +187,21 @@ export default function ConfiguracoesPage() {
               <div className="flex-1 bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm font-mono">
                 {mostrarKey ? '6416E80F51C6-4D75-9137-0741D124F130' : '••••••••••••••••••••••••••••••'}
               </div>
-              <button onClick={() => setMostrarKey(!mostrarKey)} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
+              <Button variant="ghost" size="icon-sm" onClick={() => setMostrarKey(!mostrarKey)}>
                 {mostrarKey ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
         <div className="mt-4 flex items-center gap-2">
-          <HexDot pulse className="bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.7)]" />
+          <HexDot pulse className="bg-emerald-500" />
           <span className="text-xs text-muted-foreground">Conectado — TechXap - ConsorHive</span>
         </div>
       </div>
 
       {/* Seção Agente */}
-      <div className="card-hex-cut bg-card border border-border p-6">
+      <div className="card-hex-cut border border-border bg-card p-6">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/80 mb-1">Automação</p>
         <h3 className="text-foreground font-semibold mb-4">Agente (Maikon)</h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -219,7 +225,7 @@ export default function ConfiguracoesPage() {
           <div>
             <label className="block text-xs text-muted-foreground mb-1">Status do Agente</label>
             <div className="flex items-center gap-2 bg-muted border border-border rounded-lg px-3 py-2">
-              <HexDot pulse className="bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.7)]" />
+              <HexDot pulse className="bg-emerald-500" />
               <span className="text-foreground text-sm">Online</span>
             </div>
           </div>
@@ -227,19 +233,17 @@ export default function ConfiguracoesPage() {
       </div>
 
       {/* Seção Templates */}
-      <div className="card-hex-cut bg-card border border-border p-6">
+      <div className="card-hex-cut border border-border bg-card p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/80 mb-1">Mensagens</p>
             <h3 className="text-foreground font-semibold">Templates de Mensagem</h3>
             <p className="text-muted-foreground text-xs mt-0.5">Mensagens usadas nas campanhas de prospecção</p>
           </div>
-          <button
-            onClick={() => setMostrarForm(!mostrarForm)}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          >
+          <Button onClick={() => setMostrarForm(!mostrarForm)}>
             <Plus size={15} />
             Novo template
-          </button>
+          </Button>
         </div>
 
         {/* Variáveis disponíveis */}
@@ -298,26 +302,23 @@ export default function ConfiguracoesPage() {
               {erroGerarNovo && <p className="text-xs text-red-600 mt-1.5">{erroGerarNovo}</p>}
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={criarTemplate}
-                disabled={criando || !novoNome.trim() || !novoCorpo.trim()}
-                className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
+              <Button onClick={criarTemplate} disabled={criando || !novoNome.trim() || !novoCorpo.trim()}>
                 <Save size={14} />
                 {criando ? 'Salvando...' : 'Salvar template'}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
                 onClick={gerarParaNovo}
                 disabled={gerandoNovo || !novoCorpo.trim()}
-                className="flex items-center gap-2 bg-secondary/15 hover:bg-secondary/25 disabled:opacity-40 disabled:cursor-not-allowed text-secondary px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 title="Reescreve a mensagem com blocos de variação usando IA"
+                className="border-secondary/25 text-secondary hover:border-secondary/50 hover:bg-secondary/5"
               >
                 <Sparkles size={14} />
                 {gerandoNovo ? 'Gerando...' : 'Gerar variações com IA'}
-              </button>
-              <button onClick={() => setMostrarForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              </Button>
+              <Button variant="ghost" onClick={() => setMostrarForm(false)}>
                 Cancelar
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -358,26 +359,15 @@ export default function ConfiguracoesPage() {
                         <p className="text-muted-foreground text-xs whitespace-pre-wrap line-clamp-3">{t.corpo}</p>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          onClick={() => abrirEdicao(t)}
-                          className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
-                          title="Editar"
-                        >
+                        <Button variant="ghost" size="icon-xs" onClick={() => abrirEdicao(t)} title="Editar">
                           <Pencil size={14} />
-                        </button>
-                        <button
-                          onClick={() => toggleTemplate(t.id, t.ativo)}
-                          className="p-1.5 text-muted-foreground hover:text-foreground transition-colors text-xs"
-                          title={t.ativo ? 'Desativar' : 'Ativar'}
-                        >
+                        </Button>
+                        <Button variant="ghost" size="icon-xs" onClick={() => toggleTemplate(t.id, t.ativo)} title={t.ativo ? 'Desativar' : 'Ativar'}>
                           {t.ativo ? <EyeOff size={14} /> : <Eye size={14} />}
-                        </button>
-                        <button
-                          onClick={() => deletarTemplate(t.id)}
-                          className="p-1.5 text-muted-foreground hover:text-red-600 transition-colors"
-                        >
+                        </Button>
+                        <Button variant="ghost" size="icon-xs" onClick={() => deletarTemplate(t.id)} className="hover:text-red-600">
                           <Trash2 size={14} />
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -410,26 +400,23 @@ export default function ConfiguracoesPage() {
                       </div>
                       {erroGerarEdicao && <p className="text-xs text-red-600">{erroGerarEdicao}</p>}
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => salvarEdicao(t.id)}
-                          disabled={salvandoEdicao || !edicaoCorpo.trim()}
-                          className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                        >
+                        <Button onClick={() => salvarEdicao(t.id)} disabled={salvandoEdicao || !edicaoCorpo.trim()}>
                           <Save size={14} />
                           {salvandoEdicao ? 'Salvando...' : 'Salvar'}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="outline"
                           onClick={gerarParaEdicao}
                           disabled={gerandoEdicao || !edicaoCorpo.trim()}
-                          className="flex items-center gap-2 bg-secondary/15 hover:bg-secondary/25 disabled:opacity-40 disabled:cursor-not-allowed text-secondary px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                           title="Reescreve a mensagem com blocos de variação usando IA"
+                          className="border-secondary/25 text-secondary hover:border-secondary/50 hover:bg-secondary/5"
                         >
                           <Sparkles size={14} />
                           {gerandoEdicao ? 'Gerando...' : 'Gerar variações com IA'}
-                        </button>
-                        <button onClick={fecharEdicao} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        </Button>
+                        <Button variant="ghost" onClick={fecharEdicao}>
                           Cancelar
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   )}

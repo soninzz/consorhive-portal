@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import { supabase, type Lista } from '@/lib/supabase';
 import { normalizarTelefone, extrairDDD, formatarData } from '@/lib/utils';
 import { HexBadge, HexIcon } from '@/components/ui/hex';
+import { Button } from '@/components/ui/button';
 import { Upload, List, Trash2, ArrowRight, Users, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { useConfirm } from '@/hooks/use-confirm';
 
@@ -146,20 +147,18 @@ export default function ListasPage() {
   }
 
   return (
-    <div className="flex-1 p-8 space-y-6">
+    <div className="bg-honeycomb relative min-h-full flex-1 space-y-8 p-8 pt-7">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between border-b border-border pb-5">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Listas de Contatos</h2>
-          <p className="text-muted-foreground text-sm mt-1">Importe suas listas para iniciar campanhas de prospecção.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Origem dos leads</p>
+          <h2 className="font-heading mt-1 text-2xl font-semibold tracking-tight text-foreground">Listas de Contatos</h2>
+          <p className="text-muted-foreground text-sm mt-1.5">Importe suas listas para iniciar campanhas de prospecção.</p>
         </div>
-        <button
-          onClick={() => setModalAberto(true)}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
+        <Button onClick={() => setModalAberto(true)}>
           <Upload size={16} />
           Importar Lista
-        </button>
+        </Button>
       </div>
 
       {/* Tabela */}
@@ -180,21 +179,21 @@ export default function ListasPage() {
           </button>
         </div>
       ) : (
-        <div className="bg-honeycomb card-hex-cut bg-card border border-border overflow-hidden">
+        <div className="card-hex-cut-sm border border-border bg-card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Nome</th>
-                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Origem</th>
-                <th className="text-right px-6 py-3 text-muted-foreground font-medium">Contatos</th>
-                <th className="text-right px-6 py-3 text-muted-foreground font-medium">Contactados</th>
-                <th className="text-left px-6 py-3 text-muted-foreground font-medium">Criada em</th>
-                <th className="px-6 py-3" />
+                <th className="text-left px-6 pb-3 pt-5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Nome</th>
+                <th className="text-left px-6 pb-3 pt-5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Origem</th>
+                <th className="text-right px-6 pb-3 pt-5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Contatos</th>
+                <th className="text-right px-6 pb-3 pt-5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Contactados</th>
+                <th className="text-left px-6 pb-3 pt-5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Criada em</th>
+                <th className="px-6 pb-3 pt-5" />
               </tr>
             </thead>
             <tbody>
               {listas.map((lista) => (
-                <tr key={lista.id} className="border-b border-border/60 hover:bg-muted/50 transition-colors">
+                <tr key={lista.id} className="border-b border-border/70 transition-colors hover:bg-muted/40 last:border-b-0">
                   <td className="px-6 py-4 text-foreground font-medium">{lista.nome}</td>
                   <td className="px-6 py-4">
                     <HexBadge className="bg-muted text-muted-foreground">{lista.origem}</HexBadge>
@@ -238,10 +237,11 @@ export default function ListasPage() {
 
       {/* Modal de Importação */}
       {modalAberto && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="card-hex-cut border border-border bg-card w-full max-w-xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-border">
-              <h3 className="text-lg font-semibold text-foreground">Importar Lista</h3>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Nova origem</p>
+              <h3 className="font-heading text-lg font-semibold text-foreground mt-1">Importar Lista</h3>
               <p className="text-muted-foreground text-sm mt-1">Suporta .xlsx e .csv. Máximo 5.000 contatos.</p>
             </div>
 
@@ -364,17 +364,16 @@ export default function ListasPage() {
             </div>
 
             <div className="p-6 border-t border-border flex justify-end gap-3">
-              <button onClick={fecharModal} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Button variant="ghost" onClick={fecharModal}>
                 {resultado ? 'Fechar' : 'Cancelar'}
-              </button>
+              </Button>
               {!resultado && (
-                <button
+                <Button
                   onClick={importar}
                   disabled={!arquivo || !colunaMap.telefone || !nomeLista.trim() || importando}
-                  className="px-5 py-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground text-sm font-medium rounded-lg transition-colors"
                 >
                   {importando ? 'Importando...' : 'Importar'}
-                </button>
+                </Button>
               )}
             </div>
           </div>

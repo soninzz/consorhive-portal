@@ -6,7 +6,7 @@ type HexStep = { label: string };
 /** Stepper de células hexagonais se preenchendo — narrativa "seu enxame está sendo montado". */
 export function HexStepper({ steps, current }: { steps: HexStep[]; current: number }) {
   return (
-    <div className="mb-8 flex items-center gap-1.5">
+    <div className="flex items-center gap-1.5">
       {steps.map((step, idx) => {
         const num = idx + 1;
         const done = current > num;
@@ -15,9 +15,8 @@ export function HexStepper({ steps, current }: { steps: HexStep[]; current: numb
           <div key={step.label} className="flex items-center gap-1.5">
             <div
               className={cn(
-                "hex-cell relative flex h-9 w-9 items-center justify-center text-sm font-semibold transition-all duration-300",
-                done && "bg-primary text-primary-foreground",
-                active && "hex-cell-active bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-[0_0_14px_rgba(var(--glow-gold),0.55)]",
+                "hex-cell relative flex h-9 w-9 items-center justify-center text-sm font-semibold transition-colors duration-300",
+                (done || active) && "bg-primary text-primary-foreground",
                 !done && !active && "bg-muted text-muted-foreground"
               )}
             >

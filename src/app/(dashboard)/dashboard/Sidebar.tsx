@@ -20,11 +20,10 @@ export function Sidebar() {
   return (
     <aside className="bg-honeycomb-dark dark relative z-10 hidden h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar/95 p-4 backdrop-blur-xl md:flex">
       <div className="mb-8 flex items-center gap-2.5 p-2">
-        <span className="hex-icon relative flex h-9 w-9 items-center justify-center bg-gradient-to-br from-primary to-primary/40">
-          <span className="absolute inset-0 animate-pulse-glow bg-primary/40 blur-md" />
-          <span className="hex-icon relative h-3.5 w-3.5 scale-[0.6] bg-background" />
+        <span className="hex-icon relative flex h-9 w-9 items-center justify-center bg-primary">
+          <span className="hex-icon relative h-3.5 w-3.5 scale-[0.6] bg-sidebar" />
         </span>
-        <h1 className="text-xl font-bold tracking-tight text-gradient-gold">ConsorHive</h1>
+        <h1 className="font-heading text-xl font-bold tracking-tight text-gradient-gold">ConsorHive</h1>
       </div>
 
       <nav className="flex flex-col gap-1">
@@ -48,7 +47,7 @@ export function Sidebar() {
                 {active && (
                   <motion.span
                     layoutId="sidebar-active"
-                    className="hex-cell absolute left-0 top-1/2 h-4 w-2 -translate-y-1/2 bg-primary shadow-[0_0_10px_rgba(var(--glow-gold),0.6)]"
+                    className="hex-cell absolute left-0 top-1/2 h-4 w-2 -translate-y-1/2 bg-primary"
                     transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                   />
                 )}

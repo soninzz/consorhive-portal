@@ -17,7 +17,7 @@ function HexIcon({
     <span
       data-slot="hex-icon"
       className={cn(
-        "hex-icon relative inline-flex shrink-0 items-center justify-center bg-gradient-to-br from-primary/25 to-primary/5",
+        "hex-icon relative inline-flex shrink-0 items-center justify-center bg-muted",
         sizes[size],
         className
       )}

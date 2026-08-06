@@ -1,20 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HexIcon } from "@/components/ui/hex";
-import { Users, MessageSquareText, PhoneForwarded, Activity, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from '@/lib/utils';
+import { Users, MessageSquareText, PhoneForwarded, Activity, RefreshCw, Hexagon } from "lucide-react";
 import { supabase } from '@/lib/supabase';
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 14 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.06, duration: 0.4, ease: 'easeOut' as const },
-  }),
-};
 
 type DashboardStats = {
   totalLeads: number;
@@ -100,143 +90,118 @@ export default function DashboardPage() {
     return `Há ${Math.floor(diff / 86400)}d`;
   }
 
-  const primaryKpi = {
-    label: 'Aguardando Consultor',
-    value: loading ? '...' : stats.aguardandoConsultor,
-    hint: 'Leads aquecidos prontos pra contato humano agora',
-    icon: PhoneForwarded,
-  };
-
-  const secondaryKpis = [
+  const kpis = [
+    {
+      label: 'Aguardando Consultor',
+      value: loading ? '···' : String(stats.aguardandoConsultor),
+      icon: PhoneForwarded,
+      primary: true,
+    },
     {
       label: 'Leads em Prospecção',
-      value: loading ? '...' : stats.totalLeads.toLocaleString('pt-BR'),
-      hint: 'Total de leads no sistema',
+      value: loading ? '···' : stats.totalLeads.toLocaleString('pt-BR'),
       icon: Users,
+      primary: false,
     },
     {
       label: 'Conversas Ativas',
-      value: loading ? '...' : stats.conversasAtivas,
-      hint: 'Bot ativo respondendo agora',
+      value: loading ? '···' : String(stats.conversasAtivas),
       icon: MessageSquareText,
+      primary: false,
     },
     {
       label: 'Taxa de Engajamento',
-      value: loading ? '...' : `${stats.taxaResposta}%`,
-      hint: 'Leads que avançaram na qualificação',
+      value: loading ? '···' : `${stats.taxaResposta}%`,
       icon: Activity,
+      primary: false,
     },
   ];
 
   return (
-    <div className="bg-honeycomb relative flex-1 space-y-6 p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">Visão Geral da Operação</span>
-          <button
-            onClick={carregarDados}
-            className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-          >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            Atualizar
-          </button>
+    <div className="bg-honeycomb relative min-h-full flex-1 space-y-8 p-8 pt-7">
+      {/* Header */}
+      <div className="flex items-end justify-between border-b border-border pb-5">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+            Operação em tempo real
+          </p>
+          <h2 className="font-heading mt-1 text-2xl font-semibold tracking-tight text-foreground">
+            Dashboard
+          </h2>
         </div>
+        <Button variant="outline" size="sm" onClick={carregarDados} disabled={loading}>
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+          Atualizar
+        </Button>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* KPI principal — a métrica acionável do momento, tratamento de destaque */}
-        <motion.div custom={0} initial="hidden" animate="show" variants={fadeUp} className="lg:col-span-1">
-          <Card className="card-hex-cut card-hex-frame relative h-full overflow-hidden border-none bg-gradient-to-br from-primary/15 via-card to-card p-1 ring-1 ring-primary/25">
-            <div className="glow-blob glow-blob-gold animate-pulse-glow absolute -right-8 -top-8 h-32 w-32 opacity-70" />
-            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-sm font-medium text-foreground/80">{primaryKpi.label}</CardTitle>
-              <HexIcon size="lg" className="from-primary/50 to-primary/10">
-                <primaryKpi.icon className="h-5 w-5 text-primary" />
-              </HexIcon>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-4xl font-bold text-primary">{primaryKpi.value}</div>
-              <p className="mt-1 text-xs text-muted-foreground">{primaryKpi.hint}</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* KPIs secundários — mesma família visual, peso menor */}
-        <div className="grid gap-4 sm:grid-cols-3 lg:col-span-2">
-          {secondaryKpis.map((kpi, i) => (
-            <motion.div key={kpi.label} custom={i + 1} initial="hidden" animate="show" variants={fadeUp}>
-              <Card className="card-hex-cut-sm group/kpi relative h-full overflow-hidden border-none bg-card/80 ring-1 ring-border/60 transition-colors hover:ring-primary/30">
-                <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-1">
-                  <CardTitle className="text-xs font-medium text-muted-foreground">{kpi.label}</CardTitle>
-                  <HexIcon size="sm">
-                    <kpi.icon className="h-3.5 w-3.5 text-primary" />
-                  </HexIcon>
-                </CardHeader>
-                <CardContent className="relative">
-                  <div className="text-xl font-bold text-foreground">{kpi.value}</div>
-                  <p className="text-xs text-muted-foreground">{kpi.hint}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <motion.div custom={4} initial="hidden" animate="show" variants={fadeUp} className="lg:col-span-4">
-          <Card className="card-hex-cut glass-panel border-none">
-            <CardHeader>
-              <CardTitle className="text-foreground">Performance de Disparos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="relative flex h-[250px] w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-md border border-border/70 bg-muted/30">
-                <div className="flex items-end gap-1.5">
-                  {[0, 1, 2, 3, 2, 1, 0].map((delay, i) => (
-                    <span
-                      key={i}
-                      className="hex-cell animate-pulse-glow h-6 w-6 bg-primary/25"
-                      style={{ animationDelay: `${delay * 0.35}s` }}
-                    />
-                  ))}
-                </div>
-                <p className="max-w-[220px] text-center text-sm text-muted-foreground">
-                  Seu enxame está pronto — o gráfico aparece assim que a primeira campanha for disparada
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div custom={5} initial="hidden" animate="show" variants={fadeUp} className="lg:col-span-3">
-          <Card className="card-hex-cut glass-panel h-full border-none">
-            <CardHeader>
-              <CardTitle className="text-foreground">Últimos Handoffs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <p className="text-sm text-muted-foreground">Carregando...</p>
-              ) : handoffs.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum handoff ainda.</p>
-              ) : (
-                <div className="space-y-5">
-                  {handoffs.map((h) => (
-                    <div key={h.lead_id} className="flex items-center">
-                      <span className="hex-cell hex-cell-active h-3 w-3 shrink-0 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                      <div className="ml-3 space-y-1">
-                        <p className="text-sm font-medium text-foreground">{h.nome}</p>
-                        <p className="text-xs text-muted-foreground">Aguardando consultor</p>
-                      </div>
-                      <div className="ml-auto text-sm text-emerald-600">
-                        {tempoRelativo(h.updated_at)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+      {/* KPIs — mesma forma pra todos (retângulo, corte de canto sutil),
+          hierarquia vem só de tipografia (tamanho/peso/cor) e espaço,
+          não de um virar hexágono grande e os outros não. */}
+      <div className="card-hex-cut-sm grid grid-cols-2 divide-x divide-y divide-border border border-border bg-card sm:grid-cols-4 sm:divide-y-0">
+        {kpis.map((kpi) => (
+          <div key={kpi.label} className={cn('p-6', kpi.primary && 'bg-muted/40')}>
+            <div className="flex items-center gap-1.5">
+              <kpi.icon size={13} className="text-muted-foreground" strokeWidth={1.75} />
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {kpi.label}
+              </p>
+            </div>
+            <p
+              className={cn(
+                'mt-2 tabular-nums leading-none',
+                kpi.primary
+                  ? 'font-heading text-4xl font-semibold text-primary'
+                  : 'text-2xl font-medium text-foreground'
               )}
-            </CardContent>
-          </Card>
-        </motion.div>
+            >
+              {kpi.value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Painéis secundários */}
+      <div className="grid gap-6 lg:grid-cols-7">
+        <div className="card-hex-cut-sm border border-border bg-card lg:col-span-4">
+          <div className="border-b border-border px-6 py-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Analytics</p>
+            <h3 className="mt-0.5 text-sm font-semibold text-foreground">Performance de Disparos</h3>
+          </div>
+          <div className="flex h-[220px] flex-col items-center justify-center gap-3 px-6">
+            <Hexagon size={22} strokeWidth={1.25} className="text-muted-foreground/50" />
+            <p className="max-w-[260px] text-center text-sm text-muted-foreground">
+              O gráfico aparece assim que a primeira campanha for disparada.
+            </p>
+          </div>
+        </div>
+
+        <div className="card-hex-cut-sm border border-border bg-card lg:col-span-3">
+          <div className="border-b border-border px-6 py-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Fila humana</p>
+            <h3 className="mt-0.5 text-sm font-semibold text-foreground">Últimos Handoffs</h3>
+          </div>
+          <div className="px-3 py-2">
+            {loading ? (
+              <p className="px-3 py-3 text-sm text-muted-foreground">Carregando...</p>
+            ) : handoffs.length === 0 ? (
+              <p className="px-3 py-3 text-sm text-muted-foreground">Nenhum handoff ainda.</p>
+            ) : (
+              handoffs.map((h) => (
+                <div key={h.lead_id} className="flex items-center gap-3 rounded-md px-3 py-2.5">
+                  <span className="hex-cell h-2 w-2 shrink-0 bg-emerald-500" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">{h.nome}</p>
+                    <p className="text-xs text-muted-foreground">Aguardando consultor</p>
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {tempoRelativo(h.updated_at)}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

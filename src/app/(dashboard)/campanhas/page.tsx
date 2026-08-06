@@ -6,6 +6,7 @@ import { supabase, type Campanha } from '@/lib/supabase';
 import { primeiroNome, gerarMensagemUnica } from '@/lib/utils';
 import { corStatus, formatarData } from '@/lib/utils';
 import { HexBadge, HexIcon } from '@/components/ui/hex';
+import { Button } from '@/components/ui/button';
 import { Zap, Plus, Pause, RotateCcw, XCircle, ChevronRight, AlertCircle, Trash2 } from 'lucide-react';
 import { useConfirm } from '@/hooks/use-confirm';
 
@@ -173,19 +174,19 @@ export default function CampanhasPage() {
   };
 
   return (
-    <div className="flex-1 p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="bg-honeycomb relative min-h-full flex-1 space-y-8 p-8 pt-7">
+      <div className="flex items-end justify-between border-b border-border pb-5">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Campanhas</h2>
-          <p className="text-muted-foreground text-sm mt-1">Crie e acompanhe seus disparos de prospecção.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Disparos de prospecção</p>
+          <h2 className="font-heading mt-1 text-2xl font-semibold tracking-tight text-foreground">Campanhas</h2>
+          <p className="text-muted-foreground text-sm mt-1.5">Crie e acompanhe seus disparos de prospecção.</p>
         </div>
-        <Link
-          href="/campanhas/nova"
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          <Plus size={16} />
-          Nova Campanha
-        </Link>
+        <Button asChild>
+          <Link href="/campanhas/nova">
+            <Plus size={16} />
+            Nova Campanha
+          </Link>
+        </Button>
       </div>
 
       {loading ? (
@@ -202,9 +203,9 @@ export default function CampanhasPage() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {campanhas.map((c) => (
-            <div key={c.id} className="card-hex-cut-sm bg-card border border-border p-5 transition-colors hover:border-primary/30">
+            <div key={c.id} className="card-hex-cut-sm border border-border bg-card p-5 transition-colors hover:border-foreground/20">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
@@ -223,29 +224,29 @@ export default function CampanhasPage() {
                 {/* Ações */}
                 <div className="flex items-center gap-2 shrink-0">
                   {c.status === 'rodando' && (
-                    <button onClick={() => pausar(c.id)} className="flex items-center gap-1 text-xs text-yellow-700 hover:text-yellow-800 transition-colors px-3 py-1.5 rounded-lg border border-yellow-500/20 hover:border-yellow-500/40">
+                    <Button variant="outline" size="xs" onClick={() => pausar(c.id)} className="border-yellow-500/25 text-yellow-700 hover:border-yellow-500/50 hover:bg-yellow-500/5">
                       <Pause size={13} /> Pausar
-                    </button>
+                    </Button>
                   )}
                   {c.status === 'pausada' && (
-                    <button onClick={() => retomar(c.id)} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 transition-colors px-3 py-1.5 rounded-lg border border-emerald-500/20 hover:border-emerald-500/40">
+                    <Button variant="outline" size="xs" onClick={() => retomar(c.id)} className="border-emerald-500/25 text-emerald-700 hover:border-emerald-500/50 hover:bg-emerald-500/5">
                       <RotateCcw size={13} /> Retomar
-                    </button>
+                    </Button>
                   )}
                   {(c.status === 'rodando' || c.status === 'pausada' || c.status === 'rascunho') && (
-                    <button onClick={() => cancelar(c.id)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg border border-border hover:border-red-500/30">
+                    <Button variant="outline" size="xs" onClick={() => cancelar(c.id)} className="hover:border-red-500/40 hover:bg-red-500/5 hover:text-red-600">
                       <XCircle size={13} /> Cancelar
-                    </button>
+                    </Button>
                   )}
                   {c.status !== 'cancelada' && c.naFila === 0 && c.restantes > 0 && (
-                    <button onClick={() => abrirContinuar(c)} className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg border border-primary/30 hover:border-primary/50">
+                    <Button variant="outline" size="xs" onClick={() => abrirContinuar(c)} className="border-primary/30 text-primary hover:border-primary/50 hover:bg-primary/5">
                       <ChevronRight size={13} /> Continuar disparo ({c.restantes} restantes)
-                    </button>
+                    </Button>
                   )}
                   {(c.status === 'concluida' || c.status === 'cancelada') && (
-                    <button onClick={() => excluirCampanha(c)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg border border-border hover:border-red-500/30" title="Excluir da lista">
+                    <Button variant="outline" size="xs" onClick={() => excluirCampanha(c)} title="Excluir da lista" className="hover:border-red-500/40 hover:bg-red-500/5 hover:text-red-600">
                       <Trash2 size={13} /> Excluir
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -284,7 +285,7 @@ export default function CampanhasPage() {
         const qtdValida = continuarQtd.trim() !== '' && qtd > 0 && qtd <= c.restantes;
         return (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="card-hex-cut bg-card border border-border w-full max-w-sm p-6 space-y-4">
+            <div className="card-hex-cut border border-border bg-card w-full max-w-sm p-6 space-y-4">
               <div>
                 <h3 className="text-foreground font-semibold">Continuar disparo</h3>
                 <p className="text-muted-foreground text-sm mt-1">
@@ -318,17 +319,13 @@ export default function CampanhasPage() {
                 </div>
               )}
               <div className="flex justify-end gap-3">
-                <button onClick={() => { setContinuarId(null); setErroContinuar(''); }} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Button variant="ghost" onClick={() => { setContinuarId(null); setErroContinuar(''); }}>
                   Cancelar
-                </button>
-                <button
-                  onClick={() => continuarDisparo(c)}
-                  disabled={continuando || !qtdValida}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
+                </Button>
+                <Button onClick={() => continuarDisparo(c)} disabled={continuando || !qtdValida}>
                   <Zap size={14} />
                   {continuando ? 'Disparando...' : 'Disparar'}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

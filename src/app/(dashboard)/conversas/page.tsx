@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { HexBadge, HexIcon } from '@/components/ui/hex';
+import { Button } from '@/components/ui/button';
 import { MessageSquare, Search, User, Bot, RefreshCw, UserCheck } from 'lucide-react';
 
 type Lead = {
@@ -101,16 +102,16 @@ export default function ConversasPage() {
   return (
     <div className="flex h-full overflow-hidden" style={{ height: 'calc(100vh)' }}>
       {/* Sidebar lista */}
-      <div className="w-80 border-r border-border flex flex-col flex-shrink-0">
-        <div className="p-4 border-b border-border space-y-3">
+      <div className="w-80 border-r border-border flex flex-col flex-shrink-0 bg-honeycomb">
+        <div className="border-b border-border p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-foreground font-semibold flex items-center gap-2">
-              <MessageSquare size={16} className="text-emerald-600" />
-              Conversas
-            </h2>
-            <button onClick={carregar} className="text-muted-foreground hover:text-foreground transition-colors">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Inbox</p>
+              <h2 className="font-heading text-foreground font-semibold text-lg mt-1">Conversas</h2>
+            </div>
+            <Button variant="outline" size="icon-sm" onClick={carregar} title="Atualizar">
               <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            </button>
+            </Button>
           </div>
           <div className="relative">
             <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -119,16 +120,16 @@ export default function ConversasPage() {
               value={busca}
               onChange={e => setBusca(e.target.value)}
               placeholder="Buscar por nome ou telefone..."
-              className="w-full bg-muted border border-border rounded-lg pl-8 pr-3 py-2 text-foreground text-xs placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary"
+              className="w-full bg-card border border-border rounded-lg pl-8 pr-3 py-2 text-foreground text-xs placeholder:text-muted-foreground/70 shadow-xs focus:outline-none focus:border-primary"
             />
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 rounded-lg bg-muted p-1">
             {(['todos', 'ativo', 'pausado'] as const).map(f => (
               <button
                 key={f}
                 onClick={() => setFiltroBot(f)}
-                className={`flex-1 py-1.5 text-xs rounded-lg transition-colors ${
-                  filtroBot === f ? 'bg-emerald-600 text-white' : 'bg-muted text-muted-foreground hover:text-foreground'
+                className={`flex-1 py-1.5 text-xs rounded-md font-medium transition-colors ${
+                  filtroBot === f ? 'bg-card text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {f === 'todos' ? 'Todos' : f === 'ativo' ? '🤖 Automático' : '👤 Humano'}
@@ -159,7 +160,7 @@ export default function ConversasPage() {
                   <div className="flex items-start gap-3">
                     <HexIcon
                       size="sm"
-                      className={ehAutomatico ? 'from-primary/40 to-primary/10' : 'from-secondary/50 to-secondary/10'}
+                      className={ehAutomatico ? 'bg-primary/10' : 'bg-secondary/15'}
                     >
                       {ehAutomatico
                         ? <Bot size={13} className="text-primary" />
@@ -214,23 +215,24 @@ export default function ConversasPage() {
             </div>
             <div>
               {leadSelecionado.status_bot === 'ativo' ? (
-                <button
+                <Button
+                  size="sm"
                   onClick={() => assumir(leadSelecionado)}
                   disabled={agindo}
-                  className="flex items-center gap-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                  className="bg-orange-600 text-white hover:bg-orange-600 hover:brightness-105"
                 >
                   <UserCheck size={13} />
                   Assumir conversa
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
+                  size="sm"
                   onClick={() => devolver(leadSelecionado)}
                   disabled={agindo}
-                  className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                 >
                   <Bot size={13} />
                   Devolver para o Maikon
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -246,7 +248,7 @@ export default function ConversasPage() {
                 <div key={i} className={`flex gap-3 ${msg.role === 'assistant' ? '' : 'flex-row-reverse'}`}>
                   <HexIcon
                     size="sm"
-                    className={msg.role === 'assistant' ? 'from-primary/40 to-primary/10' : 'from-secondary/50 to-secondary/10'}
+                    className={msg.role === 'assistant' ? 'bg-primary/10' : 'bg-secondary/15'}
                   >
                     {msg.role === 'assistant'
                       ? <Bot size={13} className="text-primary" />
